@@ -12,7 +12,7 @@
         "mailpit:up": "docker-compose -f docker-compose-mailpit.yml up -d",
         "mailpit:down": "docker-compose -f docker-compose-mailpit.yml down",
         "docker:build": "docker build --tag legitservices/mirotalk:latest .",
-        "docker:buildx": "docker buildx build --platform linux/amd64,linux/arm64 --tag legitservices/mirotalk:latest --push .",
+        "docker:buildx": "docker buildx build --platform linux/amd64 --tag legitservices/mirotalk:latest --push .",
         "docker:rmi": "docker images |grep '<none>' |awk '{print $3}' |xargs docker rmi",
         "docker:push": "docker push legitservices/mirotalk:latest",
         "docker:pull": "docker pull legitservices/mirotalk:latest",

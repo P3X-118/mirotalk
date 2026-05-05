@@ -34,14 +34,14 @@ npm run mailpit:down
 
 # Docker (all repointed to legitservices/mirotalk on sgc-dev / sgc branches)
 npm run docker:build       # single-arch local build of legitservices/mirotalk:latest
-npm run docker:buildx      # multi-arch (amd64+arm64) build AND push to Docker Hub
+npm run docker:buildx      # amd64-only build AND push to Docker Hub (arm to be added to a future CI pipeline)
 npm run docker:push        # push legitservices/mirotalk:latest
 npm run docker:run         # ephemeral, no .env mount
 npm run docker:rune        # mounts ./.env read-only
 npm run docker:run-vm      # mounts .env + app/ + public/ for live edits
 ```
 
-For a tagged production release: `docker buildx build --platform linux/amd64,linux/arm64 -t legitservices/mirotalk:<tag> -t legitservices/mirotalk:latest --push .` — `docker login` to the `legitservices` Docker Hub account first. Releases are cut from the `sgc` branch only, after `sgc-dev` security review.
+For a tagged production release: `docker buildx build --platform linux/amd64 -t legitservices/mirotalk:<tag> -t legitservices/mirotalk:latest --push .` — `docker login` to the `legitservices` Docker Hub account first. Releases are cut from the `sgc` branch only, after `sgc-dev` security review. ARM builds are deferred to a future CI pipeline; do not enable QEMU/multi-arch on developer workstations.
 
 ## Required Pre-Run Files
 
