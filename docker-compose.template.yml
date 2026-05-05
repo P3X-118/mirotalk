@@ -1,6 +1,6 @@
 services:
     mirotalk:
-        image: mirotalk/p2p:latest
+        image: legitservices/mirotalk:latest
         container_name: mirotalk
         hostname: mirotalk
         restart: unless-stopped

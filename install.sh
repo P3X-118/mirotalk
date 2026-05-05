@@ -97,7 +97,7 @@ if [ "$answer" != "${answer#[Yy]}" ] ;then
 
         log "Get latest official image from Docker Hub"
 
-        docker pull mirotalk/p2p:latest
+        docker pull legitservices/mirotalk:latest
     else
         log "Build image from source"
 

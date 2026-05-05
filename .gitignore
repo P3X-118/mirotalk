@@ -24,3 +24,6 @@ output
 env.txt
 
 .idea
+
+# Claude Code local settings
+.claude/

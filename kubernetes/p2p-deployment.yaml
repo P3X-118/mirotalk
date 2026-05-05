@@ -17,7 +17,7 @@ spec:
                 app: p2p
         spec:
             containers:
-                - image: mirotalk/p2p:latest
+                - image: legitservices/mirotalk:latest
                   name: mirotalk
                   ports:
                       - containerPort: 3000
