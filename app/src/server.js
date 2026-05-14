@@ -570,8 +570,11 @@ app.get(['/privacy'], (req, res) => {
 app.get(['/icetest'], (req, res) => {
     if (Object.keys(req.query).length > 0) {
         log.debug('Request Query', req.query);
+        return res.sendFile(views.stunTurn);
     }
-    res.sendFile(views.stunTurn);
+    // No iceServers in query — redirect with the server's configured iceServers
+    // so the test page exercises our actual STUN/TURN, not its hardcoded fallback.
+    return res.redirect('/icetest?iceServers=' + encodeURIComponent(JSON.stringify(iceServers)));
 });
 
 // Check if room active (exists)
