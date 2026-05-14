@@ -200,8 +200,7 @@ if (turnServerEnabled && turnServerUrl && turnServerUsername && turnServerCreden
 }
 
 // Test Stun and Turn connection with query params
-// const testStunTurn = host + '/icetest?iceServers=' + JSON.stringify(iceServers);
-const testStunTurn = host + '/icetest';
+const testStunTurn = host + '/icetest?iceServers=' + encodeURIComponent(JSON.stringify(iceServers));
 
 // IP Lookup
 const IPLookupEnabled = config.ipLookup.enabled;
