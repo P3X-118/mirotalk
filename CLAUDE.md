@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Context
 
-This is a fork of [miroslavpejic85/mirotalk](https://github.com/miroslavpejic85/mirotalk) — a WebRTC P2P video conferencing server. It is being adapted for self-hosting at `hi.sgc.ai`.
+This is a fork of [miroslavpejic85/mirotalk](https://github.com/miroslavpejic85/mirotalk) — a WebRTC P2P video conferencing server. It is being adapted for self-hosting at `meet.sgc.ai`.
 
 The fork has two sister projects:
 - **`~/sgc/ansible/roles/mirotalk-ar`** — Ansible role that deploys this app. Defaults to image `legitservices/mirotalk:latest` (not the upstream `mirotalk/p2p:latest`).
