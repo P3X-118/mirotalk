@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a fork of [miroslavpejic85/mirotalk](https://github.com/miroslavpejic85/mirotalk) — a WebRTC P2P video conferencing server. It is being adapted for self-hosting at `meet.sgc.ai`.
 
 The fork has two sister projects:
+
 - **`~/sgc/ansible/roles/mirotalk-ar`** — Ansible role that deploys this app. Defaults to image `legitservices/mirotalk:latest` (not the upstream `mirotalk/p2p:latest`).
 - **`~/sgc/SGC`** — master MASH-based playbook that consumes the role. The role must follow the SGC architectural patterns documented in `~/sgc/CLAUDE.md` (4-step add pattern, role-specific markers, password derivation, etc.).
 
@@ -73,18 +74,18 @@ Everything is centralized in `app/src/config.js` (copied from `config.template.j
 
 ### Modules in `app/src/`
 
-| File | Purpose |
-|---|---|
-| `server.js` | Express, Socket.IO, room lifecycle, signaling, chat, ChatGPT, OIDC, webhook, Sentry, Slack/Mattermost dispatch |
-| `api.js` | REST API handlers (mounted under `/api/v1`) |
-| `tokenManager.js` | JWT mint/verify for room join tokens |
-| `host.js` | Tracks IPs authenticated via host-protection login |
-| `validate.js` | Input schema validation (covered by `tests/test-validate.js`) |
-| `xss.js` | XSS sanitization wrapper around DOMPurify+jsdom (covered by `tests/test-xss.js`) |
-| `htmlInjector.js` | Server-side HTML injection points (analytics, branding) |
-| `mattermost.js` | Mattermost bot integration |
-| `logs.js` | Structured logger (JSON or colorized, env-controlled) |
-| `lib/nodemailer.js` | Email alerts/notifications |
+| File                | Purpose                                                                                                        |
+| ------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `server.js`         | Express, Socket.IO, room lifecycle, signaling, chat, ChatGPT, OIDC, webhook, Sentry, Slack/Mattermost dispatch |
+| `api.js`            | REST API handlers (mounted under `/api/v1`)                                                                    |
+| `tokenManager.js`   | JWT mint/verify for room join tokens                                                                           |
+| `host.js`           | Tracks IPs authenticated via host-protection login                                                             |
+| `validate.js`       | Input schema validation (covered by `tests/test-validate.js`)                                                  |
+| `xss.js`            | XSS sanitization wrapper around DOMPurify+jsdom (covered by `tests/test-xss.js`)                               |
+| `htmlInjector.js`   | Server-side HTML injection points (analytics, branding)                                                        |
+| `mattermost.js`     | Mattermost bot integration                                                                                     |
+| `logs.js`           | Structured logger (JSON or colorized, env-controlled)                                                          |
+| `lib/nodemailer.js` | Email alerts/notifications                                                                                     |
 
 ### Client code
 
