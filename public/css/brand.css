@@ -1,0 +1,151 @@
+/* SGC Meet brand palette — derived from the gold/navy alpha-omega logo.
+   Loaded after landing.css/newcall.css so these rules win. */
+
+:root {
+    --brand-gold: #cfa13b;
+    --brand-gold-bright: #e8c766;
+    --brand-gold-dim: #8a6a1e;
+    --brand-bg: #0a0c14;
+    --brand-bg-elev: #141826;
+    --brand-surface: #1e2334;
+    --brand-border: #2c3247;
+    --brand-text: #f2ecda;
+    --brand-text-muted: #9c9176;
+}
+
+html,
+body {
+    background: radial-gradient(ellipse at 50% 35%, #161a2b 0%, var(--brand-bg) 70%) fixed;
+    color: var(--brand-text);
+    min-height: 100vh;
+}
+
+/* Lay the page out as: logo header on top, room box centred in the rest. */
+.body-wrap {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.site-header {
+    padding-top: 32px;
+}
+
+.site-header-inner {
+    justify-content: center;
+}
+
+.brand-logo {
+    border-radius: 14px;
+    box-shadow: 0 0 24px rgba(207, 161, 59, 0.25);
+    width: 72px;
+    height: 72px;
+}
+
+.site-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Room-picker card */
+.cta {
+    width: 100%;
+    max-width: 560px;
+}
+
+.cta-inner,
+.cta-split {
+    background: var(--brand-bg-elev) !important;
+    border: 1px solid var(--brand-border);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+    flex-direction: column;
+    gap: 20px;
+    padding: 36px 32px;
+}
+
+.cta-slogan h3 {
+    color: var(--brand-text);
+    text-align: center;
+}
+
+/* Input + generate button */
+.room-input-wrap {
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-border);
+    border-radius: 8px;
+}
+
+.form-input {
+    background: transparent !important;
+    color: var(--brand-text) !important;
+    border: none !important;
+}
+
+.form-input::placeholder {
+    color: var(--brand-text-muted);
+}
+
+.room-gen-btn {
+    color: var(--brand-gold);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.room-gen-btn:hover {
+    color: var(--brand-gold-bright);
+}
+
+/* Primary action */
+.button-primary,
+.button-primary:active {
+    background: var(--brand-gold) !important;
+    color: #1a140a !important;
+    border: none !important;
+    font-weight: 700;
+}
+
+.button-primary:hover {
+    background: var(--brand-gold-bright) !important;
+}
+
+/* Secondary action */
+.button-custom-room {
+    background: transparent !important;
+    color: var(--brand-gold) !important;
+    border: 1px solid var(--brand-gold-dim) !important;
+}
+
+.button-custom-room:hover {
+    border-color: var(--brand-gold) !important;
+    color: var(--brand-gold-bright) !important;
+}
+
+.last-room,
+#appJoinLastRoom {
+    color: var(--brand-text-muted);
+}
+
+.last-room a,
+#lastRoom {
+    color: var(--brand-gold);
+}
+
+/* Defensive: ensure stripped marketing chrome stays gone even if some
+   legacy CSS tries to display it. */
+#snow-container,
+.site-footer,
+#topSponsors,
+#features,
+#browsers,
+#teams,
+#tryEasier,
+#poweredBy,
+#sponsors,
+#pastSponsors,
+#advertisers,
+#supportUs {
+    display: none !important;
+}

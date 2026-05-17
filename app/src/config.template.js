@@ -255,43 +255,41 @@ module.exports = {
         htmlInjection: true,
         app: {
             language: 'en', // https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes
-            name: 'MiroTalk',
-            title: '<h1>MiroTalk</h1>Free browser based Real-time video calls.<br />Simple, Secure, Fast.',
-            description:
-                'Start your next video call with a single click. No download, plug-in, or login is required. Just get straight to talking, messaging, and sharing your screen.',
-            joinDescription: 'Pick a room name.<br />How about this one?',
+            name: 'SGC Meet',
+            title: '<h1>SGC Meet</h1>Secure browser-based video meetings.',
+            description: 'Pick a room name and start a secure video meeting. No download or login required.',
+            joinDescription: 'Pick a room name.',
             joinButtonLabel: 'JOIN ROOM',
             customizeRoomButtonLabel: 'CUSTOMIZE ROOM',
             joinLastLabel: 'Your recent room:',
         },
         og: {
             type: 'app-webrtc',
-            siteName: 'MiroTalk',
-            title: 'Click the link to make a call.',
-            description:
-                'MiroTalk calling provides real-time HD quality and latency simply not available with traditional technology.',
-            image: 'https://p2p.mirotalk.com/images/preview.png',
-            url: 'https://p2p.mirotalk.com',
+            siteName: 'SGC Meet',
+            title: 'Click the link to join the meeting.',
+            description: 'SGC Meet provides secure, real-time HD video meetings right in your browser.',
+            image: 'https://meet.sgc.ai/images/sgc-logo.jpg',
+            url: 'https://meet.sgc.ai',
         },
         site: {
-            shortcutIcon: '../images/logo.svg',
-            appleTouchIcon: '../images/logo.svg',
-            landingTitle: 'MiroTalk a Free Secure Video Calls, Chat & Screen Sharing.',
-            newCallTitle: 'MiroTalk a Free Secure Video Calls, Chat & Screen Sharing.',
+            shortcutIcon: '../images/sgc-favicon.jpg',
+            appleTouchIcon: '../images/sgc-logo.jpg',
+            landingTitle: 'SGC Meet — Secure Video Meetings.',
+            newCallTitle: 'SGC Meet — Secure Video Meetings.',
             newCallRoomTitle: 'Pick name. <br />Share URL. <br />Start conference.',
             newCallRoomDescription:
                 "Each room has its disposable URL. Just pick a room name and share your custom URL. It's that easy.",
-            loginTitle: 'MiroTalk - Host Protected login required.',
+            loginTitle: 'SGC Meet - Host Protected login required.',
             loginHeading: 'Welcome back',
             loginDescription: 'Enter your credentials to continue.',
             loginButtonLabel: 'Login',
             joinRoomTitle: 'Pick name.<br />Share URL.<br />Start conference.',
             joinRoomButtonLabel: 'JOIN ROOM',
-            clientTitle: 'MiroTalk WebRTC Video call, Chat Room & Screen Sharing.',
-            privacyPolicyTitle: 'MiroTalk - privacy and policy.',
+            clientTitle: 'SGC Meet — WebRTC Video Meeting, Chat & Screen Sharing.',
+            privacyPolicyTitle: 'SGC Meet - privacy and policy.',
             stunTurnTitle: 'Test Stun/Turn Servers.',
-            notFoundTitle: 'MiroTalk - 404 Page not found.',
-            waitingRoomTitle: 'MiroTalk - Waiting for host to start the meeting',
+            notFoundTitle: 'SGC Meet - 404 Page not found.',
+            waitingRoomTitle: 'SGC Meet - Waiting for host to start the meeting',
             waitingRoomHeading: 'Waiting for host...',
             waitingRoomDescription:
                 "The meeting hasn't started yet.<br />You'll join automatically when the host opens the room.",
@@ -305,45 +303,27 @@ module.exports = {
             waitingRoomSongUrl: '../sounds/waiting-music.mp3',
         },
         html: {
-            topSponsors: true,
-            features: true,
-            browsers: true,
-            teams: true, // please keep me always true ;)
-            tryEasier: true,
-            poweredBy: true,
-            sponsors: true,
-            pastSponsors: true,
-            advertisers: true,
-            supportUs: true,
-            footer: true,
+            topSponsors: false,
+            features: false,
+            browsers: false,
+            teams: false,
+            tryEasier: false,
+            poweredBy: false,
+            sponsors: false,
+            pastSponsors: false,
+            advertisers: false,
+            supportUs: false,
+            footer: false,
         },
         about: {
-            imageUrl: '../images/mirotalk-logo.gif',
-            title: `WebRTC P2P v${packageJson.version}`,
+            imageUrl: '../images/sgc-logo.jpg',
+            title: `SGC Meet v${packageJson.version}`,
             html: `
-                <button 
-                    id="support-button" 
-                    data-umami-event="Support button" 
-                    onclick="window.open('https://codecanyon.net/user/miroslavpejic85')">
-                    <i class="fas fa-heart" ></i>&nbsp;Support
-                </button>
-                <br /><br /><br />
-                Author:<a 
-                    id="linkedin-button" 
-                    data-umami-event="Linkedin button" 
-                    href="https://www.linkedin.com/in/miroslav-pejic-976a07101/" target="_blank"> 
-                    Miroslav Pejic
-                </a>
                 <br />
-                Email:<a 
-                    id="email-button" 
-                    data-umami-event="Email button" 
-                    href="mailto:miroslav.pejic.85@gmail.com?subject=MiroTalk P2P info"> 
-                    miroslav.pejic.85@gmail.com
-                </a>
+                <span>Secure browser-based video meetings.</span>
                 <br /><br />
                 <hr />
-                <span>&copy; 2025 MiroTalk P2P, all rights reserved</span>
+                <span>&copy; 2026 SGC, all rights reserved</span>
                 <hr />
             `,
         },
