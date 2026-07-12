@@ -1,21 +1,43 @@
-/* SGC Meet brand palette — derived from the gold/navy alpha-omega logo.
+/* Brand palettes, keyed off html[data-brand] (injected server-side via the
+   {{BRAND_THEME}} placeholder and re-asserted by brand.js from /brand data).
+   Default :root palette = sgc (SGC Meet gold/navy, alpha-omega logo).
    Loaded after landing.css/newcall.css so these rules win. */
 
 :root {
-    --brand-gold: #cfa13b;
-    --brand-gold-bright: #e8c766;
-    --brand-gold-dim: #8a6a1e;
+    --brand-accent: #cfa13b;
+    --brand-accent-bright: #e8c766;
+    --brand-accent-dim: #8a6a1e;
     --brand-bg: #0a0c14;
     --brand-bg-elev: #141826;
     --brand-surface: #1e2334;
     --brand-border: #2c3247;
     --brand-text: #f2ecda;
     --brand-text-muted: #9c9176;
+    --brand-bg-glow: #161a2b;
+    --brand-logo-glow: rgba(207, 161, 59, 0.25);
+    --brand-btn-text: #1a140a;
+}
+
+/* Smooje / Libations (cooey.club) — berry-purple palette matched to the
+   auth.cooey.club Authentik brand (#6544e9 family), mango straw accent. */
+html[data-brand='smooje'] {
+    --brand-accent: #7c5cff;
+    --brand-accent-bright: #9d85ff;
+    --brand-accent-dim: #4f33c4;
+    --brand-bg: #0a0118;
+    --brand-bg-elev: #15101f;
+    --brand-surface: #1e1730;
+    --brand-border: #322550;
+    --brand-text: #efeaff;
+    --brand-text-muted: #a394cf;
+    --brand-bg-glow: #2a1a5e;
+    --brand-logo-glow: rgba(124, 92, 255, 0.3);
+    --brand-btn-text: #ffffff;
 }
 
 html,
 body {
-    background: radial-gradient(ellipse at 50% 35%, #161a2b 0%, var(--brand-bg) 70%) fixed;
+    background: radial-gradient(ellipse at 50% 35%, var(--brand-bg-glow) 0%, var(--brand-bg) 70%) fixed;
     color: var(--brand-text);
     min-height: 100vh;
 }
@@ -37,7 +59,7 @@ body {
 
 .brand-logo {
     border-radius: 14px;
-    box-shadow: 0 0 24px rgba(207, 161, 59, 0.25);
+    box-shadow: 0 0 24px var(--brand-logo-glow);
     width: 72px;
     height: 72px;
 }
@@ -88,39 +110,39 @@ body {
 }
 
 .room-gen-btn {
-    color: var(--brand-gold);
+    color: var(--brand-accent);
     background: transparent;
     border: none;
     cursor: pointer;
 }
 
 .room-gen-btn:hover {
-    color: var(--brand-gold-bright);
+    color: var(--brand-accent-bright);
 }
 
 /* Primary action */
 .button-primary,
 .button-primary:active {
-    background: var(--brand-gold) !important;
-    color: #1a140a !important;
+    background: var(--brand-accent) !important;
+    color: var(--brand-btn-text) !important;
     border: none !important;
     font-weight: 700;
 }
 
 .button-primary:hover {
-    background: var(--brand-gold-bright) !important;
+    background: var(--brand-accent-bright) !important;
 }
 
 /* Secondary action */
 .button-custom-room {
     background: transparent !important;
-    color: var(--brand-gold) !important;
-    border: 1px solid var(--brand-gold-dim) !important;
+    color: var(--brand-accent) !important;
+    border: 1px solid var(--brand-accent-dim) !important;
 }
 
 .button-custom-room:hover {
-    border-color: var(--brand-gold) !important;
-    color: var(--brand-gold-bright) !important;
+    border-color: var(--brand-accent) !important;
+    color: var(--brand-accent-bright) !important;
 }
 
 .last-room,
@@ -130,7 +152,7 @@ body {
 
 .last-room a,
 #lastRoom {
-    color: var(--brand-gold);
+    color: var(--brand-accent);
 }
 
 /* Defensive: ensure stripped marketing chrome stays gone even if some

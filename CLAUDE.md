@@ -72,6 +72,10 @@ There is no SFU/MCU — media goes peer-to-peer between browsers. The Node serve
 
 Everything is centralized in `app/src/config.js` (copied from `config.template.js`). That file does the `require('dotenv').config()` and exposes a single nested object. **The rest of the codebase imports `config` and never touches `process.env` directly** — preserve this pattern when adding new settings: add the env var to `.env.template`, parse it in `config.template.js`, and consume the resulting field elsewhere.
 
+### Branding presets
+
+UI branding is preset-driven: the `BRAND_PRESET` env var (`sgc` default = SGC Meet/meet.sgc.ai; `smooje` = Libations/libations.cooey.club) selects an entry in the `brandPresets` table at the top of `config.template.js`. A preset carries the `app`/`og`/`site`/`about` text blocks plus `theme` (palette key — `public/css/brand.css` themes off `html[data-brand]`, which `htmlInjector` injects server-side via `{{BRAND_THEME}}`) and `roomNames` (adjective/noun dictionaries for the client room-name generator; tokens must stay lowercase alphanumeric). Browsers receive the active preset via `GET /brand` — `public/js/brand.js` applies it to the DOM and hands `roomNames` to `public/js/common.js`. One Docker image serves all brands; add new brands as presets, not per-brand images.
+
 ### Modules in `app/src/`
 
 | File                | Purpose                                                                                                        |

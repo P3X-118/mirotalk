@@ -28,6 +28,9 @@ class HtmlInjector {
                 'MiroTalk calling provides real-time HD quality and latency simply not available with traditional technology.',
             OG_IMAGE: this.config?.og?.image || 'https://p2p.mirotalk.com/images/preview.png',
             OG_URL: this.config?.og?.url || 'https://p2p.mirotalk.com',
+            BRAND_THEME: this.config?.theme || 'sgc',
+            BRAND_LOGO: this.config?.site?.brandLogo || '../images/sgc-logo.jpg',
+            BRAND_LANDING_TITLE: this.config?.site?.landingTitle || 'MiroTalk',
             // Add more data here as needed with fallbacks
         };
     }
@@ -85,9 +88,9 @@ class HtmlInjector {
         }
 
         try {
-            // Replace placeholders with dynamic data (OG, TITLE, etc.)
+            // Replace placeholders with dynamic data (OG, BRAND, etc.)
             const modifiedHTML = this.cache[filePath].replace(
-                /{{(OG_[A-Z_]+)}}/g,
+                /{{((?:OG|BRAND)_[A-Z_]+)}}/g,
                 (_, key) => this.injectData[key] || ''
             );
 

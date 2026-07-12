@@ -4,128 +4,26 @@
 // NEW CALL
 // ####################################################################
 
-// Stargate-themed room name dictionary
-const adjectives = [
-    'ancient',
-    'ascended',
-    'lost',
-    'forbidden',
-    'hidden',
-    'sacred',
-    'frozen',
-    'buried',
-    'crystal',
-    'naquadah',
-    'subspace',
-    'galactic',
-    'stellar',
-    'cosmic',
-    'astral',
-    'shielded',
-    'cloaked',
-    'gated',
-    'quantum',
-    'temporal',
-    'orbital',
-    'arctic',
-    'desert',
-    'oceanic',
-    'iron',
-    'golden',
-    'silver',
-    'dark',
-    'bright',
-    'wild',
-    'rogue',
-    'free',
-    'noble',
-    'fallen',
-    'risen',
-    'eternal',
-    'distant',
-    'unknown',
-    'final',
-    'first',
-    'rapid',
-    'silent',
-    'hostile',
-    'sealed',
-    'dialed',
-    'active',
-    'deep',
-    'outer',
-    'inner',
-    'red',
-];
+// Fallback room-name dictionaries. The active brand preset ships its own
+// dictionaries via GET /brand (config.js brand.roomNames): brand.js applies
+// them through applyBrandRoomNames() below, and repeat visits pick them up
+// synchronously from the sessionStorage brand cache. These short neutral
+// lists only surface if /brand is unavailable.
+let roomNameDict = {
+    adjectives: ['quick', 'bright', 'hidden', 'golden', 'silent', 'wild', 'cosmic', 'velvet'],
+    nouns: ['room', 'call', 'lounge', 'summit', 'harbor', 'studio', 'parlor', 'meeting'],
+};
 
-const nouns = [
-    'abydos',
-    'chulak',
-    'dakara',
-    'atlantis',
-    'tollana',
-    'cimmeria',
-    'langara',
-    'hebridan',
-    'vorash',
-    'netu',
-    'othala',
-    'camelot',
-    'praclarush',
-    'antarctica',
-    'cheyenne',
-    'stargate',
-    'chevron',
-    'dhd',
-    'naquadah',
-    'trinium',
-    'zatarc',
-    'goauld',
-    'jaffa',
-    'asgard',
-    'tollan',
-    'nox',
-    'ancient',
-    'ori',
-    'wraith',
-    'replicator',
-    'tauri',
-    'tokra',
-    'prior',
-    'unas',
-    'sodan',
-    'furling',
-    'daedalus',
-    'prometheus',
-    'odyssey',
-    'hammond',
-    'jumper',
-    'teltac',
-    'alkesh',
-    'hatak',
-    'glider',
-    'sangraal',
-    'zpm',
-    'kawoosh',
-    'wormhole',
-    'iris',
-    'gateroom',
-    'sg1',
-    'horus',
-    'anubis',
-    'baal',
-    'apophis',
-    'ra',
-    'sokar',
-    'thor',
-    'oma',
-];
+try {
+    const cachedBrand = JSON.parse(window.sessionStorage.getItem('brandDataP2P') || 'null');
+    if (cachedBrand?.roomNames?.adjectives?.length && cachedBrand?.roomNames?.nouns?.length) {
+        roomNameDict = cachedBrand.roomNames;
+    }
+} catch (err) {
+    console.warn('Brand room-name cache unavailable', err.message);
+}
 
-let adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-let noun = nouns[Math.floor(Math.random() * nouns.length)];
-let num = getRandomNumber(5);
-noun = noun.charAt(0).toUpperCase() + noun.substring(1);
-adjective = adjective.charAt(0).toUpperCase() + adjective.substring(1);
+let roomNameUserEdited = false;
 
 /**
  * Get random number
@@ -142,9 +40,34 @@ function getRandomNumber(length) {
     return result;
 }
 
+/**
+ * Compose a random room-name suggestion from the active dictionary
+ * @returns {string} e.g. 12345AncientAbydos
+ */
+function generateRoomSuggestion() {
+    const pick = (list) => list[Math.floor(Math.random() * list.length)];
+    const capitalize = (word) => word.charAt(0).toUpperCase() + word.substring(1);
+    return getRandomNumber(5) + capitalize(pick(roomNameDict.adjectives)) + capitalize(pick(roomNameDict.nouns));
+}
+
+/**
+ * Swap in the brand's room-name dictionaries (called by brand.js once
+ * /brand has been fetched) and refresh the suggestion, unless the user
+ * already typed a room name of their own.
+ * @param {object} dict {adjectives: [...], nouns: [...]}
+ */
+function applyBrandRoomNames(dict) {
+    if (!dict?.adjectives?.length || !dict?.nouns?.length) return;
+    roomNameDict = dict;
+    if (roomName && !roomNameUserEdited) {
+        txt = generateRoomSuggestion();
+        shuffleText(roomName, txt);
+    }
+}
+
 // Shuffle Text Effect
 
-let txt = num + adjective + noun;
+let txt = generateRoomSuggestion();
 
 /**
  * Shuffle text effect for input fields
@@ -185,6 +108,10 @@ const roomName = document.getElementById('roomName');
 if (roomName) {
     roomName.value = '';
     shuffleText(roomName, txt);
+
+    roomName.addEventListener('input', () => {
+        roomNameUserEdited = true;
+    });
 
     roomName.onkeyup = (e) => {
         if (e.keyCode === 13) {

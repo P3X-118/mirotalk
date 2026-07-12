@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en" class="no-js">
+<html lang="en" class="no-js" data-brand="{{BRAND_THEME}}">
     <head>
         <!-- Title and Icon -->
 
-        <title id="landingTitle">SGC Meet — Secure Video Meetings.</title>
+        <title id="landingTitle">{{BRAND_LANDING_TITLE}}</title>
         <link id="shortcutIcon" rel="shortcut icon" type="image/jpeg" href="../images/sgc-favicon.jpg" />
         <link id="appleTouchIcon" rel="apple-touch-icon" href="../images/sgc-logo.jpg" />
 
@@ -13,10 +13,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <meta
-            name="description"
-            content="SGC Meet — secure, real-time WebRTC video meetings, chat and screen sharing in your browser. Pick a room name and start."
-        />
+        <meta name="description" content="{{OG_DESCRIPTION}}" />
 
         <!-- https://ogp.me -->
 
@@ -44,7 +41,7 @@
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
-        <!-- SGC brand palette (loaded last so it overrides) -->
+        <!-- Brand palette (theme selected via html[data-brand]; loaded last so it overrides) -->
 
         <link rel="stylesheet" href="../css/brand.css" />
 
@@ -61,9 +58,10 @@
                             <div class="m-0">
                                 <a href="/">
                                     <img
+                                        id="brandLogo"
                                         class="brand-logo"
-                                        src="../images/sgc-logo.jpg"
-                                        alt="SGC Meet"
+                                        src="{{BRAND_LOGO}}"
+                                        alt="brand logo"
                                         width="48"
                                         height="48"
                                     />
@@ -82,7 +80,7 @@
                             </div>
                             <div class="cta-action">
                                 <div class="mb-0">
-                                    <label class="form-label screen-reader" for="roomName">SGC Meet</label>
+                                    <label class="form-label screen-reader" for="roomName">Room name</label>
                                     <div class="form-group-desktop">
                                         <div class="room-input-wrap">
                                             <input
