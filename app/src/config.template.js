@@ -43,6 +43,181 @@ function parseJsonEnv(envValue, fallback) {
 
 const port = process.env.PORT || 3000;
 
+// ==========================================
+// Brand presets
+// ==========================================
+// BRAND_PRESET selects which baked-in UI brand this instance serves:
+//   sgc    - SGC Meet (meet.sgc.ai): gold/navy palette, Stargate room names (default)
+//   smooje - Libations (libations.cooey.club): cooey purple palette, beverage room names
+// Each preset carries the app/og/site/about text blocks plus:
+//   theme     - palette key; injected as html[data-brand] and themed in public/css/brand.css
+//   roomNames - adjective/noun dictionaries for the client room-name generator,
+//               delivered to the browser via GET /brand (see public/js/common.js)
+// Dictionary tokens must stay lowercase alphanumeric so generated names are URL-safe.
+const brandPresets = {
+    sgc: {
+        theme: 'sgc',
+        roomNames: {
+            adjectives: (
+                'ancient ascended lost forbidden hidden sacred frozen buried crystal naquadah subspace ' +
+                'galactic stellar cosmic astral shielded cloaked gated quantum temporal orbital arctic desert ' +
+                'oceanic iron golden silver dark bright wild rogue free noble fallen risen eternal distant ' +
+                'unknown final first rapid silent hostile sealed dialed active deep outer inner red'
+            ).split(' '),
+            nouns: (
+                'abydos chulak dakara atlantis tollana cimmeria langara hebridan vorash netu othala camelot ' +
+                'praclarush antarctica cheyenne stargate chevron dhd naquadah trinium zatarc goauld jaffa ' +
+                'asgard tollan nox ancient ori wraith replicator tauri tokra prior unas sodan furling daedalus ' +
+                'prometheus odyssey hammond jumper teltac alkesh hatak glider sangraal zpm kawoosh wormhole ' +
+                'iris gateroom sg1 horus anubis baal apophis ra sokar thor oma'
+            ).split(' '),
+        },
+        app: {
+            language: 'en', // https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes
+            name: 'SGC Meet',
+            title: '<h1>SGC Meet</h1>Secure browser-based video meetings.',
+            description: 'Pick a room name and start a secure video meeting. No download or login required.',
+            joinDescription: 'Pick a room name.',
+            joinButtonLabel: 'JOIN ROOM',
+            customizeRoomButtonLabel: 'CUSTOMIZE ROOM',
+            joinLastLabel: 'Your recent room:',
+        },
+        og: {
+            type: 'app-webrtc',
+            siteName: 'SGC Meet',
+            title: 'Click the link to join the meeting.',
+            description: 'SGC Meet provides secure, real-time HD video meetings right in your browser.',
+            image: 'https://meet.sgc.ai/images/sgc-logo.jpg',
+            url: 'https://meet.sgc.ai',
+        },
+        site: {
+            brandLogo: '../images/sgc-logo.jpg',
+            shortcutIcon: '../images/sgc-favicon.jpg',
+            appleTouchIcon: '../images/sgc-logo.jpg',
+            landingTitle: 'SGC Meet — Secure Video Meetings.',
+            newCallTitle: 'SGC Meet — Secure Video Meetings.',
+            newCallRoomTitle: 'Pick name. <br />Share URL. <br />Start conference.',
+            newCallRoomDescription:
+                "Each room has its disposable URL. Just pick a room name and share your custom URL. It's that easy.",
+            loginTitle: 'SGC Meet - Host Protected login required.',
+            loginHeading: 'Welcome back',
+            loginDescription: 'Enter your credentials to continue.',
+            loginButtonLabel: 'Login',
+            joinRoomTitle: 'Pick name.<br />Share URL.<br />Start conference.',
+            joinRoomButtonLabel: 'JOIN ROOM',
+            clientTitle: 'SGC Meet — WebRTC Video Meeting, Chat & Screen Sharing.',
+            privacyPolicyTitle: 'SGC Meet - privacy and policy.',
+            stunTurnTitle: 'Test Stun/Turn Servers.',
+            notFoundTitle: 'SGC Meet - 404 Page not found.',
+            waitingRoomTitle: 'SGC Meet - Waiting for host to start the meeting',
+            waitingRoomHeading: 'Waiting for host...',
+            waitingRoomDescription:
+                "The meeting hasn't started yet.<br />You'll join automatically when the host opens the room.",
+            waitingRoomStatus: 'Checking room status...',
+            waitingRoomReady: 'Room is ready! Joining...',
+            waitingRoomWaiting: 'Waiting for host to start the meeting...',
+            waitingRoomHostLink: 'Are you the host?',
+            waitingRoomLoginLink: 'Login here',
+            waitingRoomElapsedJust: 'Just started waiting',
+            waitingRoomElapsedMinutes: 'Waiting for {minutes}',
+            waitingRoomSongUrl: '../sounds/waiting-music.mp3',
+        },
+        about: {
+            imageUrl: '../images/sgc-logo.jpg',
+            title: `SGC Meet v${packageJson.version}`,
+            html: `
+                <br />
+                <span>Secure browser-based video meetings.</span>
+                <br /><br />
+                <hr />
+                <span>&copy; 2026 SGC, all rights reserved</span>
+                <hr />
+            `,
+        },
+    },
+    smooje: {
+        theme: 'smooje',
+        roomNames: {
+            adjectives: (
+                'frosty fizzy sparkling bubbly frothy creamy silky velvet chilled iced frozen muddled shaken ' +
+                'stirred spiced zesty citrus tropical tangy tart sweet sour bitter dry neat smooth crisp bold ' +
+                'mellow smoky oaky aged barrel craft golden amber crimson ruby emerald midnight sunrise sunset ' +
+                'island garden wild fresh juicy ripe minty berry double tall'
+            ).split(' '),
+            nouns: (
+                'smooje smoothie frappe slushie nectar mojito negroni spritz julep daiquiri margarita martini ' +
+                'manhattan gimlet paloma bellini mimosa sangria punch toddy nightcap highball lowball tumbler ' +
+                'snifter flute coupe jigger shaker muddler garnish bitters vermouth amaro espresso macchiato ' +
+                'cortado latte mocha matcha chai kombucha seltzer tonic soda cider mead porter stout lager ' +
+                'pilsner saison malt fizz swizzle cooler cordial syrup grenadine orgeat tiki cabana speakeasy ' +
+                'taproom cellar orchard vineyard'
+            ).split(' '),
+        },
+        app: {
+            language: 'en',
+            name: 'Libations',
+            title: '<h1>Libations</h1>Drinks with friends, face to face.',
+            description: 'Pick a room name, pour something nice, and settle in. No download required.',
+            joinDescription: 'Name your room.',
+            joinButtonLabel: 'JOIN ROOM',
+            customizeRoomButtonLabel: 'CUSTOMIZE ROOM',
+            joinLastLabel: 'Your usual:',
+        },
+        og: {
+            type: 'app-webrtc',
+            siteName: 'Libations',
+            title: "You're invited — click to join the room.",
+            description: 'Libations — cooey.club video hangouts. Real-time, browser-based, no download.',
+            image: 'https://libations.cooey.club/images/smooje-logo.svg',
+            url: 'https://libations.cooey.club',
+        },
+        site: {
+            brandLogo: '../images/smooje-logo.svg',
+            shortcutIcon: '../images/smooje-logo.svg',
+            appleTouchIcon: '../images/smooje-logo.svg',
+            landingTitle: 'Libations — cooey.club video hangouts.',
+            newCallTitle: 'Libations — cooey.club video hangouts.',
+            newCallRoomTitle: 'Pick a name. <br />Share the link. <br />Raise a glass.',
+            newCallRoomDescription: "Every room has its own disposable link. Pick a name and share it — that's it.",
+            loginTitle: 'Libations - Host protected login required.',
+            loginHeading: 'Welcome back',
+            loginDescription: 'Enter your credentials to continue.',
+            loginButtonLabel: 'Login',
+            joinRoomTitle: 'Pick a name.<br />Share the link.<br />Raise a glass.',
+            joinRoomButtonLabel: 'JOIN ROOM',
+            clientTitle: 'Libations — WebRTC Video Meeting, Chat & Screen Sharing.',
+            privacyPolicyTitle: 'Libations - privacy and policy.',
+            stunTurnTitle: 'Test Stun/Turn Servers.',
+            notFoundTitle: 'Libations - 404 Page not found.',
+            waitingRoomTitle: 'Libations - Waiting for the host to open the room',
+            waitingRoomHeading: 'Waiting for your host...',
+            waitingRoomDescription: "The room isn't open yet.<br />You'll join automatically when your host arrives.",
+            waitingRoomStatus: 'Checking room status...',
+            waitingRoomReady: 'Room is open! Joining...',
+            waitingRoomWaiting: 'Waiting for your host to open the room...',
+            waitingRoomHostLink: 'Are you the host?',
+            waitingRoomLoginLink: 'Login here',
+            waitingRoomElapsedJust: 'Just started waiting',
+            waitingRoomElapsedMinutes: 'Waiting for {minutes}',
+            waitingRoomSongUrl: '../sounds/waiting-music.mp3',
+        },
+        about: {
+            imageUrl: '../images/smooje-logo.svg',
+            title: `Libations v${packageJson.version}`,
+            html: `
+                <br />
+                <span>Drinks with friends, face to face — a cooey.club hangout.</span>
+                <br /><br />
+                <hr />
+                <span>&copy; 2026 cooey.club, all rights reserved</span>
+                <hr />
+            `,
+        },
+    },
+};
+
+const brandPreset = brandPresets[process.env.BRAND_PRESET] || brandPresets.sgc;
+
 module.exports = {
     // ==========================================
     // Server
@@ -253,55 +428,12 @@ module.exports = {
     // ==========================================
     brand: {
         htmlInjection: true,
-        app: {
-            language: 'en', // https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes
-            name: 'SGC Meet',
-            title: '<h1>SGC Meet</h1>Secure browser-based video meetings.',
-            description: 'Pick a room name and start a secure video meeting. No download or login required.',
-            joinDescription: 'Pick a room name.',
-            joinButtonLabel: 'JOIN ROOM',
-            customizeRoomButtonLabel: 'CUSTOMIZE ROOM',
-            joinLastLabel: 'Your recent room:',
-        },
-        og: {
-            type: 'app-webrtc',
-            siteName: 'SGC Meet',
-            title: 'Click the link to join the meeting.',
-            description: 'SGC Meet provides secure, real-time HD video meetings right in your browser.',
-            image: 'https://meet.sgc.ai/images/sgc-logo.jpg',
-            url: 'https://meet.sgc.ai',
-        },
-        site: {
-            shortcutIcon: '../images/sgc-favicon.jpg',
-            appleTouchIcon: '../images/sgc-logo.jpg',
-            landingTitle: 'SGC Meet — Secure Video Meetings.',
-            newCallTitle: 'SGC Meet — Secure Video Meetings.',
-            newCallRoomTitle: 'Pick name. <br />Share URL. <br />Start conference.',
-            newCallRoomDescription:
-                "Each room has its disposable URL. Just pick a room name and share your custom URL. It's that easy.",
-            loginTitle: 'SGC Meet - Host Protected login required.',
-            loginHeading: 'Welcome back',
-            loginDescription: 'Enter your credentials to continue.',
-            loginButtonLabel: 'Login',
-            joinRoomTitle: 'Pick name.<br />Share URL.<br />Start conference.',
-            joinRoomButtonLabel: 'JOIN ROOM',
-            clientTitle: 'SGC Meet — WebRTC Video Meeting, Chat & Screen Sharing.',
-            privacyPolicyTitle: 'SGC Meet - privacy and policy.',
-            stunTurnTitle: 'Test Stun/Turn Servers.',
-            notFoundTitle: 'SGC Meet - 404 Page not found.',
-            waitingRoomTitle: 'SGC Meet - Waiting for host to start the meeting',
-            waitingRoomHeading: 'Waiting for host...',
-            waitingRoomDescription:
-                "The meeting hasn't started yet.<br />You'll join automatically when the host opens the room.",
-            waitingRoomStatus: 'Checking room status...',
-            waitingRoomReady: 'Room is ready! Joining...',
-            waitingRoomWaiting: 'Waiting for host to start the meeting...',
-            waitingRoomHostLink: 'Are you the host?',
-            waitingRoomLoginLink: 'Login here',
-            waitingRoomElapsedJust: 'Just started waiting',
-            waitingRoomElapsedMinutes: 'Waiting for {minutes}',
-            waitingRoomSongUrl: '../sounds/waiting-music.mp3',
-        },
+        // Active brand preset (see brandPresets above; selected via BRAND_PRESET)
+        theme: brandPreset.theme,
+        roomNames: brandPreset.roomNames,
+        app: brandPreset.app,
+        og: brandPreset.og,
+        site: brandPreset.site,
         html: {
             topSponsors: false,
             features: false,
@@ -315,18 +447,7 @@ module.exports = {
             supportUs: false,
             footer: false,
         },
-        about: {
-            imageUrl: '../images/sgc-logo.jpg',
-            title: `SGC Meet v${packageJson.version}`,
-            html: `
-                <br />
-                <span>Secure browser-based video meetings.</span>
-                <br /><br />
-                <hr />
-                <span>&copy; 2026 SGC, all rights reserved</span>
-                <hr />
-            `,
-        },
+        about: brandPreset.about,
         // https://docs.mirotalk.com/mirotalk-p2p/integration/#widgets-integration
         widget: {
             enabled: false,

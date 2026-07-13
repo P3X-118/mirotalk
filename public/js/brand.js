@@ -28,6 +28,7 @@ const notFoundTitle = document.getElementById('stunTurnTitle');
 
 const shortcutIcon = document.getElementById('shortcutIcon');
 const appleTouchIcon = document.getElementById('appleTouchIcon');
+const brandLogo = document.getElementById('brandLogo');
 
 const appTitle = document.getElementById('appTitle');
 const appDescription = document.getElementById('appDescription');
@@ -52,6 +53,7 @@ const footer = document.getElementById('footer');
 // Brand customizations...
 
 let brand = {
+    theme: 'sgc',
     app: {
         language: 'en',
         name: 'SGC Meet',
@@ -63,6 +65,7 @@ let brand = {
         joinLastLabel: 'Your recent room:',
     },
     site: {
+        brandLogo: '../images/sgc-logo.jpg',
         shortcutIcon: '../images/sgc-favicon.jpg',
         appleTouchIcon: '../images/sgc-logo.jpg',
         landingTitle: 'SGC Meet — Secure Video Meetings.',
@@ -183,6 +186,11 @@ async function getBrand() {
                     clientBrand: brand,
                 });
                 window.sessionStorage.setItem(brandDataKey, JSON.stringify(serverBrand));
+                // Late-apply the brand's room-name dictionaries (first visit only:
+                // repeat visits read them synchronously from the cache above)
+                if (serverBrand.roomNames && typeof applyBrandRoomNames === 'function') {
+                    applyBrandRoomNames(serverBrand.roomNames);
+                }
             } else {
                 console.warn('FETCH BRAND SETTINGS - DISABLED');
             }
@@ -227,6 +235,13 @@ function mergeBrand(target, source) {
  * Handle Brand
  */
 function handleBrand() {
+    if (brand.theme) document.documentElement.dataset.brand = brand.theme;
+
+    if (brandLogo && brand.site?.brandLogo) {
+        brandLogo.src = brand.site.brandLogo;
+        if (brand.app?.name) brandLogo.alt = brand.app.name;
+    }
+
     if (landingTitle && brand.site?.landingTitle) landingTitle.textContent = brand.site.landingTitle;
 
     if (newCallTitle && brand.site?.newCallTitle) newCallTitle.textContent = brand.site.newCallTitle;
