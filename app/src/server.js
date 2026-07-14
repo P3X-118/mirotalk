@@ -377,6 +377,7 @@ const channels = {}; // collect channels
 const sockets = {}; // collect sockets
 const peers = {}; // collect peers info grp by channels
 const presenters = {}; // collect presenters grp by channels
+const lobbies = {}; // knock-to-join: peers waiting to be admitted to a locked room, grp by channels
 
 const roomMetaKeys = new Set(['lock', 'password']);
 
@@ -1211,6 +1212,15 @@ io.sockets.on('connect', async (socket) => {
         for (let channel in socket.channels) {
             await removePeerFrom(channel, socket, reason);
         }
+        // Clean up any pending lobby knock from this socket and clear it from presenters' UIs
+        for (const ch of Object.keys(lobbies)) {
+            if (lobbies[ch][socket.id]) {
+                delete lobbies[ch][socket.id];
+                for (const presenterId of Object.keys(presenters[ch] || {})) {
+                    await sendToPeer(presenterId, sockets, 'roomLobby', { action: 'handled', peer_id: socket.id });
+                }
+            }
+        }
         log.debug('[' + socket.id + '] disconnected', { reason: reason });
         delete sockets[socket.id];
     });
@@ -1404,10 +1414,29 @@ io.sockets.on('connect', async (socket) => {
             }
         }
 
-        // room locked by the participants can't join
-        if (peers[channel]['lock'] === true && peers[channel]['password'] != channel_password) {
-            log.debug('[' + socket.id + '] [Warning] Room Is Locked', channel);
-            return socket.emit('roomIsLocked');
+        // Room locked → knock-to-join lobby. A peer already admitted by a
+        // presenter (socket.lobbyAdmitted) or holding the correct room password
+        // skips the lobby; everyone else waits for a presenter to admit them.
+        if (peers[channel]['lock'] === true && !(socket.lobbyAdmitted && socket.lobbyAdmitted[channel])) {
+            const roomPwd = peers[channel]['password'];
+            const passwordOk = roomPwd && channel_password && roomPwd === channel_password;
+            if (!passwordOk) {
+                if (!(channel in lobbies)) lobbies[channel] = {};
+                lobbies[channel][socket.id] = { peer_name: peer_name, peer_avatar: peer_avatar };
+                log.debug('[' + socket.id + '] Room locked → placed in lobby (knock)', channel);
+                // Ask the guest to wait
+                socket.emit('roomLobby', { action: 'waiting', peer_id: socket.id, room_id: channel });
+                // Notify the room's presenter(s) that someone is knocking
+                for (const presenterId of Object.keys(presenters[channel] || {})) {
+                    await sendToPeer(presenterId, sockets, 'roomLobby', {
+                        action: 'knock',
+                        peer_id: socket.id,
+                        peer_name: peer_name,
+                        peer_avatar: peer_avatar,
+                    });
+                }
+                return;
+            }
         }
 
         // Set the presenters
@@ -1601,6 +1630,50 @@ io.sockets.on('connect', async (socket) => {
             log.error('Room action', toJson(err));
         }
         log.debug('[' + socket.id + '] Room ' + room_id, { locked: room_is_locked, password: password });
+    });
+
+    /**
+     * Knock-to-join lobby: a presenter admits a waiting guest.
+     * Marks the guest socket admitted (so its re-join bypasses the lock) and
+     * tells it to proceed; clears the knock from any other presenters' UIs.
+     */
+    socket.on('admitPeer', async (cfg) => {
+        const config = checkXSS(cfg);
+        if (!Validate.isValidData(config)) return;
+        const { room_id, peer_id, peer_name, peer_uuid } = config;
+        if (!peers[room_id] || !lobbies[room_id] || !lobbies[room_id][peer_id]) return;
+        if (!isPeerPresenter(room_id, socket.id, peer_name, peer_uuid)) return;
+        delete lobbies[room_id][peer_id];
+        if (sockets[peer_id]) {
+            sockets[peer_id].lobbyAdmitted = sockets[peer_id].lobbyAdmitted || {};
+            sockets[peer_id].lobbyAdmitted[room_id] = true;
+        }
+        await sendToPeer(peer_id, sockets, 'roomLobby', { action: 'admit', room_id: room_id });
+        for (const presenterId of Object.keys(presenters[room_id] || {})) {
+            if (presenterId !== socket.id) {
+                await sendToPeer(presenterId, sockets, 'roomLobby', { action: 'handled', peer_id: peer_id });
+            }
+        }
+        log.debug('[' + socket.id + '] admitted [' + peer_id + '] to ' + room_id);
+    });
+
+    /**
+     * Knock-to-join lobby: a presenter denies a waiting guest.
+     */
+    socket.on('denyPeer', async (cfg) => {
+        const config = checkXSS(cfg);
+        if (!Validate.isValidData(config)) return;
+        const { room_id, peer_id, peer_name, peer_uuid } = config;
+        if (!peers[room_id] || !lobbies[room_id] || !lobbies[room_id][peer_id]) return;
+        if (!isPeerPresenter(room_id, socket.id, peer_name, peer_uuid)) return;
+        delete lobbies[room_id][peer_id];
+        await sendToPeer(peer_id, sockets, 'roomLobby', { action: 'deny', room_id: room_id });
+        for (const presenterId of Object.keys(presenters[room_id] || {})) {
+            if (presenterId !== socket.id) {
+                await sendToPeer(presenterId, sockets, 'roomLobby', { action: 'handled', peer_id: peer_id });
+            }
+        }
+        log.debug('[' + socket.id + '] denied [' + peer_id + '] on ' + room_id);
     });
 
     /**
@@ -2025,6 +2098,13 @@ io.sockets.on('connect', async (socket) => {
                 delete peers[channel];
                 delete presenters[channel];
                 delete channels[channel]; // Clean up channels to prevent memory leak
+                // Room emptied: release any guests still knocking (room closed)
+                if (lobbies[channel]) {
+                    for (const pid of Object.keys(lobbies[channel])) {
+                        await sendToPeer(pid, sockets, 'roomLobby', { action: 'deny', room_id: channel });
+                    }
+                    delete lobbies[channel];
+                }
             }
         } catch (err) {
             log.error('Remove Peer', toJson(err));
