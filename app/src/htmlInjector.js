@@ -26,8 +26,8 @@ class HtmlInjector {
             OG_DESCRIPTION:
                 this.config?.og?.description ||
                 'MiroTalk calling provides real-time HD quality and latency simply not available with traditional technology.',
-            OG_IMAGE: this.config?.og?.image || 'https://p2p.mirotalk.com/images/preview.png',
-            OG_URL: this.config?.og?.url || 'https://p2p.mirotalk.com',
+            OG_IMAGE: this.config?.og?.image || '',
+            OG_URL: this.config?.og?.url || '',
             BRAND_THEME: this.config?.theme || 'sgc',
             BRAND_LOGO: this.config?.site?.brandLogo || '../images/sgc-logo.jpg',
             BRAND_LANDING_TITLE: this.config?.site?.landingTitle || 'MiroTalk',

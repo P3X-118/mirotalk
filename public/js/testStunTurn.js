@@ -13,20 +13,10 @@ let iceServers = filterXSS(qs.get('iceServers'));
 if (iceServers) {
     iceServers = JSON.parse(iceServers);
 } else {
-    // http://localhost:3000/icetest
-    iceServers = [
-        // Test some STUN server
-        {
-            urls: 'stun:stun.l.google.com:19302',
-        },
-        // Test some TURN server
-        // https://www.metered.ca/tools/openrelay/
-        {
-            urls: 'turn:a.relay.metered.ca:443',
-            username: 'e8dd65b92c62d3e36cafb807',
-            credential: 'uWdWNmkhvyqTEswO',
-        },
-    ];
+    // Reached without an iceServers query param. The app normally opens this
+    // page via /icetest with the server's configured ICE servers injected, so
+    // there is no external/public STUN/TURN fallback baked in here.
+    iceServers = [];
 }
 
 console.log('Check Ice Servers', iceServers);
