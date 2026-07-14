@@ -1,16 +1,17 @@
 'use strict';
 
-// Umami analytics: https://github.com/mikecao/umami
-
-console.log('STATS', window.location);
+// Self-hosted Plausible analytics (SGC webstats). No third-party calls.
+// The server (/stats) hands us { enabled, src, domain, api }; we inject the
+// standard Plausible <script defer data-domain=… src=…> tag. Events post to
+// the script origin's /api/event (a public proxy to the mesh-only
+// webstats.sgc.ai), or to `api` when an override is configured.
 
 const statsDataKey = 'statsData';
-const statsData = window.sessionStorage.getItem(statsDataKey);
-
+const cachedStats = window.sessionStorage.getItem(statsDataKey);
 const apiUrl = window.location.origin + '/stats';
 
-if (statsData) {
-    setStats(JSON.parse(statsData));
+if (cachedStats) {
+    setStats(JSON.parse(cachedStats));
 } else {
     fetch(apiUrl)
         .then((response) => {
@@ -24,18 +25,17 @@ if (statsData) {
             window.sessionStorage.setItem(statsDataKey, JSON.stringify(data));
         })
         .catch((error) => {
-            console.error('Stats fetch error:', error);
+            console.error('Stats fetch error:', error.message);
         });
 }
 
 function setStats(data) {
-    console.log('STATS', data);
-    const { enabled, src, id } = data;
-    if (enabled) {
-        const script = document.createElement('script');
-        script.setAttribute('async', '');
-        script.setAttribute('src', src);
-        script.setAttribute('data-website-id', id);
-        document.head.appendChild(script);
-    }
+    const { enabled, src, domain, api } = data || {};
+    if (!enabled || !src) return;
+    const script = document.createElement('script');
+    script.defer = true;
+    script.setAttribute('src', src);
+    if (domain) script.setAttribute('data-domain', domain);
+    if (api) script.setAttribute('data-api', api);
+    document.head.appendChild(script);
 }

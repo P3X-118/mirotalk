@@ -776,8 +776,15 @@ let isHostProtected = false; // Username and Password required to initialize roo
 let isPeerAuthEnabled = false; // Username and Password required in the URL params to join room
 
 // survey
-let surveyActive = true; // when leaving the room give a feedback, if false will be redirected to newcall page
-let surveyURL = 'https://www.questionpro.com/t/AUs7VZq00L';
+let surveyActive = false; // when leaving the room give a feedback, if false will be redirected to newcall page
+let surveyURL = ''; // set via server config (config.survey); no external default
+
+// emoji-mart data/i18n served locally (no external cdn.jsdelivr.net fetch).
+// Memoized so the 432KB dataset is fetched at most once across all pickers.
+let _emojiMartDataPromise = null;
+let _emojiMartI18nPromise = null;
+const emojiMartData = () => (_emojiMartDataPromise ??= fetch('/vendor/emoji-mart/data.json').then((r) => r.json()));
+const emojiMartI18n = () => (_emojiMartI18nPromise ??= fetch('/vendor/emoji-mart/i18n-en.json').then((r) => r.json()));
 
 // Redirect on leave room
 let redirectActive = false;
@@ -5275,12 +5282,9 @@ function adaptAspectRatio() {
  * @returns object image
  */
 function genGravatar(email, size = false) {
-    const hash = md5(email.toLowerCase().trim());
-    const gravatarURL = `https://www.gravatar.com/avatar/${hash}` + (size ? `?s=${size}` : '?s=250');
-    return gravatarURL;
-    function md5(input) {
-        return CryptoJS.MD5(input).toString();
-    }
+    // Privacy: no external Gravatar lookup (which would leak an email hash to
+    // gravatar.com). Render a local letter avatar from the address instead.
+    return genAvatarSvg(email, size || 250);
 }
 
 /**
@@ -6739,6 +6743,8 @@ function setRoomEmojiButton() {
     emojiMartDiv.className = 'room-emoji-mart';
     const pickerRoomOptions = {
         theme: 'dark',
+        data: emojiMartData,
+        i18n: emojiMartI18n,
         onEmojiSelect: sendEmojiToRoom,
     };
     const emojiRoomPicker = new EmojiMart.Picker(pickerRoomOptions);
@@ -6835,6 +6841,8 @@ function setChatEmojiBtn() {
     // Add emoji picker
     const pickerOptions = {
         theme: 'dark',
+        data: emojiMartData,
+        i18n: emojiMartI18n,
         onEmojiSelect: addEmojiToMsg,
     };
     const emojiPicker = new EmojiMart.Picker(pickerOptions);
@@ -7940,6 +7948,8 @@ function toggleUsernameEmoji() {
 function handleUsernameEmojiPicker() {
     const pickerOptions = {
         theme: 'dark',
+        data: emojiMartData,
+        i18n: emojiMartI18n,
         onEmojiSelect: addEmojiToUsername,
     };
     const emojiUsernamePicker = new EmojiMart.Picker(pickerOptions);
@@ -12350,19 +12360,12 @@ async function updateMyPeerAvatarByUrl() {
             const randomAvatarGrid = document.createElement('div');
             randomAvatarGrid.style.cssText =
                 'display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:4px;';
-            const dicebearStyles = [
-                'bottts-neutral',
-                'adventurer-neutral',
-                'thumbs',
-                'initials',
-                'identicon',
-                'shapes',
-            ];
 
+            // Privacy: generate the random avatars locally (no external
+            // api.dicebear.com calls) — colored letter avatars from a seed.
             for (let i = 0; i < 6; i++) {
                 const seed = Math.random().toString(36).substring(2, 10);
-                const style = dicebearStyles[i % dicebearStyles.length];
-                const url = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}`;
+                const url = genAvatarSvg(seed, 80);
                 randomAvatarGrid.appendChild(makeAvatarImg(url));
             }
 
@@ -14412,6 +14415,8 @@ function readBlob(blob) {
  */
 async function loadPDF(pdfData, pages) {
     const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    // Use the locally vendored worker (no external CDN fetch).
+    if (pdfjsLib?.GlobalWorkerOptions) pdfjsLib.GlobalWorkerOptions.workerSrc = '/vendor/pdfjs/pdf.worker.min.js';
     pdfData = pdfData instanceof Blob ? await readBlob(pdfData) : pdfData;
     const data = atob(pdfData.startsWith(Base64Prefix) ? pdfData.substring(Base64Prefix.length) : pdfData);
     try {

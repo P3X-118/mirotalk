@@ -307,7 +307,7 @@ module.exports = {
     // ==========================================
     survey: {
         enabled: getEnvBoolean(process.env.SURVEY_ENABLED),
-        url: process.env.SURVEY_URL || 'https://www.questionpro.com/t/AUs7VZq00L',
+        url: process.env.SURVEY_URL || '',
     },
 
     // ==========================================
@@ -402,10 +402,16 @@ module.exports = {
     // ==========================================
     // Stats / Analytics
     // ==========================================
+    // Self-hosted Plausible analytics (SGC webstats). No third-party analytics.
+    // Off unless STATS_ENABLED=true. src = public ingest script URL (a public
+    // proxy to the mesh-only webstats.sgc.ai, e.g. https://stats.cooey.club/js/
+    // script.js); domain = Plausible site key (data-domain); api = optional
+    // data-api override (defaults to the script origin's /api/event).
     stats: {
-        enabled: process.env.STATS_ENABLED ? getEnvBoolean(process.env.STATS_ENABLED) : true,
-        src: process.env.STATS_SCR || 'https://stats.mirotalk.com/script.js',
-        id: process.env.STATS_ID || 'c7615aa7-ceec-464a-baba-54cb605d7261',
+        enabled: getEnvBoolean(process.env.STATS_ENABLED),
+        src: process.env.STATS_SRC || '',
+        domain: process.env.STATS_DOMAIN || '',
+        api: process.env.STATS_API || '',
     },
 
     // ==========================================
