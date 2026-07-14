@@ -1458,6 +1458,7 @@ async function initClientPeer() {
     signalingSocket.on('unauthorized', handleUnauthorized);
     signalingSocket.on('roomIsLocked', handleUnlockTheRoom);
     signalingSocket.on('roomAction', handleRoomAction);
+    signalingSocket.on('roomLobby', handleRoomLobby);
     signalingSocket.on('addPeer', handleAddPeer);
     signalingSocket.on('serverInfo', handleServerInfo);
     signalingSocket.on('sessionDescription', handleSessionDescription);
@@ -13456,19 +13457,15 @@ function handleRoomAction(config, emit = false) {
                     showDenyButton: true,
                     background: swBg,
                     imageUrl: images.locked,
-                    input: 'text',
-                    inputPlaceholder: 'Set Room password',
-                    confirmButtonText: `OK`,
+                    title: 'Lock the room?',
+                    text: 'New guests will have to knock and be admitted by you.',
+                    confirmButtonText: `Lock`,
                     denyButtonText: `Cancel`,
                     showClass: { popup: 'animate__animated animate__fadeInDown' },
                     hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-                    inputValidator: (pwd) => {
-                        if (!pwd) return 'Please enter the Room password';
-                        thisRoomPassword = pwd;
-                    },
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        thisConfig.password = thisRoomPassword;
+                        thisConfig.password = ''; // knock-only: guests are admitted by the host, no password
                         sendToServer('roomAction', thisConfig);
                         handleRoomStatus(thisConfig);
                     }
@@ -13497,7 +13494,7 @@ function handleRoomStatus(config) {
     switch (action) {
         case 'lock':
             playSound('locked');
-            userLog('toast', `${icons.user} ${peer_name} \n has 🔒 LOCKED the room by password`, 'top-end');
+            userLog('toast', `${icons.user} ${peer_name} \n has 🔒 LOCKED the room — new guests must knock`, 'top-end');
             elemDisplay(lockRoomBtn, false);
             elemDisplay(unlockRoomBtn, true);
             isRoomLocked = true;
@@ -13574,6 +13571,160 @@ function handleUnlockTheRoom() {
         elemDisplay(lockRoomBtn, false);
         elemDisplay(unlockRoomBtn, true);
     });
+}
+
+// #########################################################
+// KNOCK-TO-JOIN LOBBY
+// #########################################################
+
+/**
+ * Dispatch server 'roomLobby' events.
+ * Guest side: waiting / admit / deny. Presenter side: knock / handled.
+ * @param {object} data
+ */
+function handleRoomLobby(data) {
+    if (!data) return;
+    switch (data.action) {
+        case 'waiting': // guest: held in the lobby, waiting for the host
+            showLobbyWaiting();
+            break;
+        case 'admit': // guest: the host let us in
+            closeLobbyWaiting();
+            userLog('toast', `${icons.user} The host let you in`, 'top-end');
+            joinToChannel(); // re-join; the server now bypasses the room lock for us
+            break;
+        case 'deny': // guest: turned away (or the room closed)
+            closeLobbyWaiting();
+            handleLobbyDenied();
+            break;
+        case 'knock': // presenter: a guest is asking to join
+            addLobbyKnock(data);
+            break;
+        case 'handled': // presenter: drop a knock (admitted/denied/left elsewhere)
+            removeLobbyKnock(data.peer_id);
+            break;
+        default:
+            break;
+    }
+}
+
+/**
+ * Guest: overlay shown while waiting for the host to admit us.
+ */
+function showLobbyWaiting() {
+    playSound('alert');
+    Swal.fire({
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        background: swBg,
+        imageUrl: images.locked,
+        title: 'Waiting for the host',
+        text: 'The room is locked. The host has been asked to let you in…',
+        showConfirmButton: false,
+        showDenyButton: true,
+        denyButtonText: `Leave`,
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    }).then((result) => {
+        if (result.isDenied) openURL('/newcall');
+    });
+}
+
+function closeLobbyWaiting() {
+    if (Swal.isVisible()) Swal.close();
+}
+
+/**
+ * Guest: the host denied entry (or the room closed).
+ */
+function handleLobbyDenied() {
+    playSound('eject');
+    Swal.fire({
+        allowOutsideClick: false,
+        background: swBg,
+        position: 'center',
+        imageUrl: images.locked,
+        title: 'Not admitted',
+        text: 'The host did not let you into the room.',
+        confirmButtonText: `Ok`,
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    }).then(() => openURL('/newcall'));
+}
+
+/**
+ * Presenter: on-screen container listing guests who are knocking.
+ */
+function getLobbyContainer() {
+    let container = getId('lobbyKnocks');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'lobbyKnocks';
+        container.style.cssText =
+            'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:99999;display:flex;flex-direction:column;gap:8px;max-width:92vw;';
+        document.body.appendChild(container);
+    }
+    return container;
+}
+
+/**
+ * Presenter: add a knocking guest with Admit / Deny controls.
+ * @param {object} data { peer_id, peer_name, peer_avatar }
+ */
+function addLobbyKnock(data) {
+    const { peer_id, peer_name, peer_avatar } = data;
+    if (!peer_id || getId('knock_' + peer_id)) return;
+
+    const row = document.createElement('div');
+    row.id = 'knock_' + peer_id;
+    row.style.cssText =
+        'display:flex;align-items:center;gap:10px;background:rgba(20,22,30,0.96);border:1px solid #444;border-radius:10px;padding:8px 12px;color:#fff;box-shadow:0 6px 20px rgba(0,0,0,0.5);';
+
+    const img = document.createElement('img');
+    img.src = peer_avatar && isValidAvatarURL(peer_avatar) ? peer_avatar : genAvatarSvg(peer_name || 'Guest', 36);
+    img.width = 36;
+    img.height = 36;
+    img.style.borderRadius = '50%';
+
+    const label = document.createElement('span');
+    label.style.cssText = 'flex:1;font-size:14px;';
+    label.textContent = `${peer_name || 'Guest'} wants to join`;
+
+    const admit = document.createElement('button');
+    admit.textContent = 'Admit';
+    admit.style.cssText =
+        'background:#2e7d32;color:#fff;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;';
+    admit.onclick = () => lobbyDecision(peer_id, 'admitPeer');
+
+    const deny = document.createElement('button');
+    deny.textContent = 'Deny';
+    deny.style.cssText = 'background:#c62828;color:#fff;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;';
+    deny.onclick = () => lobbyDecision(peer_id, 'denyPeer');
+
+    row.append(img, label, admit, deny);
+    getLobbyContainer().appendChild(row);
+    playSound('newMessage');
+    screenReaderAccessibility.announceMessage(`${peer_name || 'A guest'} is asking to join`);
+}
+
+function removeLobbyKnock(peer_id) {
+    const row = getId('knock_' + peer_id);
+    if (row) row.remove();
+}
+
+/**
+ * Presenter: admit or deny a knocking guest.
+ * @param {string} peer_id the guest's socket id (from the knock)
+ * @param {string} method 'admitPeer' | 'denyPeer'
+ */
+function lobbyDecision(peer_id, method) {
+    sendToServer(method, {
+        room_id: roomId,
+        peer_id: peer_id,
+        peer_name: myPeerName,
+        peer_uuid: myPeerUUID,
+    });
+    removeLobbyKnock(peer_id);
 }
 
 /**
