@@ -23,7 +23,7 @@ module.exports = class ServerApi {
     }
 
     getStats(peers, timestamp = new Date().toISOString()) {
-        const metaKeys = new Set(['lock', 'password']);
+        const metaKeys = new Set(['lock', 'password', 'private']);
         let totalRooms = 0;
         let totalPeers = 0;
 
@@ -40,12 +40,15 @@ module.exports = class ServerApi {
     }
 
     getActiveRooms(roomList) {
-        const metaKeys = new Set(['lock', 'password']);
-        return Object.entries(roomList).map(([roomId, room]) => ({
-            id: roomId,
-            peers: room && typeof room === 'object' ? Object.keys(room).filter((k) => !metaKeys.has(k)).length : 0,
-            join: this.getProtocol() + this._host + '/' + roomId,
-        }));
+        const metaKeys = new Set(['lock', 'password', 'private']);
+        return Object.entries(roomList)
+            .filter(([, room]) => !(room && room.private)) // private rooms are hidden
+            .map(([roomId, room]) => ({
+                id: roomId,
+                peers: room && typeof room === 'object' ? Object.keys(room).filter((k) => !metaKeys.has(k)).length : 0,
+                join: this.getProtocol() + this._host + '/' + roomId,
+                locked: !!(room && room.lock),
+            }));
     }
 
     getMeetings(peers) {

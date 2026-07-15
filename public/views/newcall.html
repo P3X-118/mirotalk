@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="en" class="no-js">
+<html lang="en" class="no-js" data-brand="{{BRAND_THEME}}">
     <head>
         <!-- Title and Icon -->
 
-        <title id="newCallTitle">MiroTalk a Free Secure Video Calls, Chat & Screen Sharing.</title>
-        <link id="shortcutIcon" rel="shortcut icon" href="../images/logo.svg" />
-        <link id="appleTouchIcon" rel="apple-touch-icon" href="../images/logo.svg" />
+        <title id="newCallTitle">{{BRAND_LANDING_TITLE}}</title>
+        <link id="shortcutIcon" rel="shortcut icon" href="{{BRAND_LOGO}}" />
+        <link id="appleTouchIcon" rel="apple-touch-icon" href="{{BRAND_LOGO}}" />
 
         <!-- Meta Information -->
 
@@ -13,10 +13,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <meta
-            name="description"
-            content="MiroTalk powered by WebRTC, Real-time secure video calls, chat and screen sharing capabilities in the browser, from your mobile or desktop"
-        />
+        <meta name="description" content="{{OG_DESCRIPTION}}" />
 
         <!-- https://ogp.me -->
 
@@ -31,6 +28,10 @@
 
         <link rel="stylesheet" href="../css/landing.css" />
         <link rel="stylesheet" href="../css/newcall.css" />
+
+        <!-- Brand palette (theme selected via html[data-brand]; loaded last so it overrides) -->
+
+        <link rel="stylesheet" href="../css/brand.css" />
 
         <!-- https://animate.style 4 using for swal fadeIn-Out -->
 
@@ -60,14 +61,14 @@
                         <div class="brand">
                             <div class="m-0">
                                 <a href="/">
-                                    <img src="../images/logo.svg" alt="MiroTalk P2P" width="32" height="32" />
-                                    <!-- <img
-                                        src="../images/mirotalk-mc.png"
-                                        alt="MiroTalk P2P"
-                                        width="96"
-                                        height="auto"
-                                        style="margin-top: 80px"
-                                    /> -->
+                                    <img
+                                        id="brandLogo"
+                                        class="brand-logo"
+                                        src="{{BRAND_LOGO}}"
+                                        alt="brand logo"
+                                        width="48"
+                                        height="48"
+                                    />
                                 </a>
                             </div>
                         </div>
