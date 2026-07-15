@@ -41,6 +41,30 @@ html[data-brand='smooje'] {
     --brand-btn-text: #0e1013;
     --brand-font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
     --brand-radius: 4px;
+
+    /* Per-page var overrides so pages with their own palettes adopt the Cooey
+       Terminal colors: customizeRoom.css (--cr-*) and activeRooms.css. */
+    --cr-bg-color: #0e1013;
+    --cr-card-bg: rgba(255, 33, 41, 0.05);
+    --cr-card-border: #7a0e12;
+    --cr-card-border-strong: #ff2129;
+    --cr-text: #e6e7ea;
+    --cr-text-muted: #9a9da3;
+    --cr-input-bg: #050507;
+    --cr-input-border: #7a0e12;
+    --cr-input-border-focus: #ff2129;
+    --cr-accent-green: #ff2129;
+    --cr-accent-green-2: #c8161d;
+    --primary-bg: #0e1013;
+    --container-bg: #0b0b0e;
+    --card-bg: #050507;
+    --card-bg-hover: #15080a;
+    --accent: #ff2129;
+    --accent-hover: #ff4650;
+    --accent-glow: rgba(255, 33, 41, 0.18);
+    --text: #e6e7ea;
+    --text-muted: #9a9da3;
+    --border: #7a0e12;
 }
 
 html,
