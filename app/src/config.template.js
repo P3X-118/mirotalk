@@ -137,20 +137,21 @@ const brandPresets = {
     },
     smooje: {
         theme: 'smooje',
+        // Room names are Smooj-flavor themed: a fruit/descriptor + a smoothie
+        // form, e.g. MangoColada, SpikedPinacolada, CoconutBlast. Smooj's real
+        // flavors (Piña Colada, Strawberry Banana) and their fruits lead the
+        // lists; the rest is the tropical-smoothie flavor family. Tokens stay
+        // lowercase alphanumeric so generated names are URL-safe.
         roomNames: {
             adjectives: (
-                'frosty fizzy sparkling bubbly frothy creamy silky velvet chilled iced frozen muddled shaken ' +
-                'stirred spiced zesty citrus tropical tangy tart sweet sour bitter dry neat smooth crisp bold ' +
-                'mellow smoky oaky aged barrel craft golden amber crimson ruby emerald midnight sunrise sunset ' +
-                'island garden wild fresh juicy ripe minty berry double tall'
+                'pinacolada strawberrybanana pineapple coconut strawberry banana mango peach watermelon guava ' +
+                'passionfruit papaya lime kiwi cherry raspberry blueberry blackberry pomegranate dragonfruit ' +
+                'lychee apricot nectarine spiked frozen creamy tropical frosty boozy chilled ripe juicy tangy ' +
+                'sunny island'
             ).split(' '),
             nouns: (
-                'smooje smoothie frappe slushie nectar mojito negroni spritz julep daiquiri margarita martini ' +
-                'manhattan gimlet paloma bellini mimosa sangria punch toddy nightcap highball lowball tumbler ' +
-                'snifter flute coupe jigger shaker muddler garnish bitters vermouth amaro espresso macchiato ' +
-                'cortado latte mocha matcha chai kombucha seltzer tonic soda cider mead porter stout lager ' +
-                'pilsner saison malt fizz swizzle cooler cordial syrup grenadine orgeat tiki cabana speakeasy ' +
-                'taproom cellar orchard vineyard'
+                'smooj smoothie colada pinacolada strawberrybanana daiquiri slushie sorbet blend nectar freezie ' +
+                'swirl blast fizz cooler punch splash frappe slush spritz twist crush wave breeze'
             ).split(' '),
         },
         app: {
