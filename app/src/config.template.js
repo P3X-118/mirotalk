@@ -363,6 +363,10 @@ module.exports = {
     // ==========================================
     oidc: {
         enabled: process.env.OIDC_ENABLED ? getEnvBoolean(process.env.OIDC_ENABLED) : false,
+        // Optional-OIDC: when false (default), OIDC provides IDENTITY only — the
+        // app stays anonymous-accessible and a signed-in user is recognized
+        // (name auto-filled, staging screen skipped). Set true to force login.
+        forceLogin: getEnvBoolean(process.env.OIDC_FORCE_LOGIN),
         allowRoomCreationForAuthUsers: process.env.OIDC_ALLOW_ROOMS_CREATION_FOR_AUTH_USERS
             ? getEnvBoolean(process.env.OIDC_ALLOW_ROOMS_CREATION_FOR_AUTH_USERS)
             : false,
@@ -381,7 +385,9 @@ module.exports = {
             auth0Logout: process.env.OIDC_AUTH_LOGOUT ? getEnvBoolean(process.env.OIDC_AUTH_LOGOUT) : true,
             routes: {
                 callback: '/auth/callback',
-                login: false,
+                // Explicit sign-in entry point (SSO-instant if the user already
+                // has an auth.cooey.club/Discord session). Not auto-forced.
+                login: '/auth/login',
                 logout: '/logout',
             },
         },

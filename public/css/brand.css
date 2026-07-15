@@ -50,6 +50,33 @@ body {
     min-height: 100vh;
 }
 
+/* Optional-OIDC sign-in status, top-right of the landing header. */
+.site-header-inner {
+    position: relative;
+}
+.auth-status {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.auth-status .auth-user {
+    color: var(--brand-accent);
+    letter-spacing: 0.04em;
+}
+.auth-status .auth-link {
+    color: var(--brand-text-muted);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--brand-border);
+}
+.auth-status .auth-link:hover {
+    color: var(--brand-accent-bright);
+}
+
 /* Lay the page out as: logo header on top, room box centred in the rest. */
 .body-wrap {
     min-height: 100vh;
@@ -179,6 +206,78 @@ body {
 #advertisers,
 #supportUs {
     display: none !important;
+}
+
+/* Live room list (landing) */
+.rooms-section .rooms-inner {
+    max-width: 560px;
+    margin: 0 auto;
+    gap: 14px;
+}
+.rooms-title {
+    margin: 0 0 4px;
+    font-size: 15px;
+}
+.room-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+}
+.room-list-empty {
+    color: var(--brand-text-muted);
+    font-size: 13px;
+    text-align: center;
+    padding: 8px 0;
+}
+.room-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-border);
+    border-radius: var(--brand-radius, 8px);
+    color: var(--brand-text);
+    text-decoration: none;
+    transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
+}
+.room-row:hover {
+    border-color: var(--brand-accent);
+    box-shadow: 0 0 14px rgba(255, 33, 41, 0.25);
+}
+.room-name {
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.room-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--brand-text-muted);
+    font-size: 12px;
+    white-space: nowrap;
+}
+.room-state {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    padding: 2px 8px;
+    border-radius: 3px;
+    border: 1px solid;
+}
+.room-state-open {
+    color: #8fe388;
+    border-color: rgba(143, 227, 136, 0.4);
+}
+.room-state-locked {
+    color: var(--brand-accent-bright);
+    border-color: var(--brand-accent-dim);
 }
 
 /* ===================================================================== */

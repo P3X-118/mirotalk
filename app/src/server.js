@@ -305,7 +305,12 @@ function OIDCAuth(req, res, next) {
             return next();
         }
 
-        // Apply requiresAuth() middleware conditionally
+        // Optional-OIDC (default): identity only — allow anonymous through.
+        if (!OIDC.forceLogin) {
+            return next();
+        }
+
+        // Forced-login mode: require authentication for this route.
         requiresAuth()(req, res, function () {
             log.debug('OIDC ------> requiresAuth');
             // Check if user is authenticated
@@ -379,7 +384,7 @@ const peers = {}; // collect peers info grp by channels
 const presenters = {}; // collect presenters grp by channels
 const lobbies = {}; // knock-to-join: peers waiting to be admitted to a locked room, grp by channels
 
-const roomMetaKeys = new Set(['lock', 'password']);
+const roomMetaKeys = new Set(['lock', 'password', 'private']);
 
 function getPeerCount(roomId) {
     if (!peers[roomId]) return 0;
@@ -486,13 +491,15 @@ if (OIDC.enabled) {
     }
 }
 
-// Route to display user information
+// Route to display user information (works anonymously under optional-OIDC:
+// returns the identity if signed in, else { profile: false }).
 app.get('/profile', OIDCAuth, (req, res) => {
-    if (OIDC.enabled) {
+    if (OIDC.enabled && req.oidc.isAuthenticated()) {
         log.debug('OIDC User profile requested', req.oidc.user);
         return res.json(req.oidc.user); // Send user information as JSON
     }
-    return res.json({ profile: false });
+    // Anonymous: tell the client whether an optional sign-in is available.
+    return res.json({ profile: false, oidcEnabled: OIDC.enabled });
 });
 
 // Authentication Callback Route
@@ -555,6 +562,23 @@ app.get('/customizeRoom', OIDCAuth, (req, res) => {
 app.get('/stats', (req, res) => {
     //log.debug('Send stats', statsData);
     res.send(statsData);
+});
+
+// Public room list for the landing page — the 3 tiers of rooms:
+//   open   → not locked (join freely)
+//   locked → locked but knockable (shown so guests can knock)
+//   private→ locked + hidden (NOT included here)
+// Gated by SHOW_ACTIVE_ROOMS; only live rooms (≥1 peer) are listed.
+app.get('/roomList', (req, res) => {
+    if (!hostCfg.showActiveRooms) return res.json({ enabled: false, rooms: [] });
+    const rooms = [];
+    for (const [id, room] of Object.entries(peers)) {
+        if (!room || typeof room !== 'object' || room.private) continue;
+        const count = getPeerCount(id);
+        if (count === 0) continue;
+        rooms.push({ id: id, peers: count, locked: room.lock === true });
+    }
+    res.json({ enabled: true, rooms: rooms });
 });
 
 // mirotalk about
@@ -1600,9 +1624,13 @@ io.sockets.on('connect', async (socket) => {
                     if (!isPresenter) return;
                     peers[room_id]['lock'] = true;
                     peers[room_id]['password'] = password;
+                    // 3rd tier: a private room is also hidden from the public
+                    // room list (still knock-gated, like a locked room).
+                    peers[room_id]['private'] = config.private === true;
                     await sendToRoom(room_id, socket.id, 'roomAction', {
                         peer_name: peer_name,
                         action: action,
+                        private: peers[room_id]['private'],
                     });
                     room_is_locked = true;
                     break;
@@ -1610,6 +1638,7 @@ io.sockets.on('connect', async (socket) => {
                     if (!isPresenter) return;
                     delete peers[room_id]['lock'];
                     delete peers[room_id]['password'];
+                    delete peers[room_id]['private'];
                     await sendToRoom(room_id, socket.id, 'roomAction', {
                         peer_name: peer_name,
                         action: action,
@@ -2366,7 +2395,7 @@ function isAllowedRoomAccess(logMessage, req, hostCfg, peers, roomId) {
     const roomCount = Object.keys(peers).length;
 
     const allowRoomAccess =
-        (!hostCfg.protected && !OIDC.enabled) || // No host protection and OIDC mode enabled (default)
+        (!hostCfg.protected && (!OIDC.enabled || !OIDC.forceLogin)) || // Open access (anonymous / optional-OIDC)
         (OIDCUserAuthenticated && roomExist) || // User authenticated via OIDC and room Exist
         (hostUserAuthenticated && roomExist) || // User authenticated via Login and room Exist
         ((OIDCUserAuthenticated || hostUserAuthenticated) && roomCount === 0) || // User authenticated joins the first room

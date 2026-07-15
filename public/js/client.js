@@ -1928,12 +1928,37 @@ async function getUserName() {
 }
 
 /**
+ * Get the signed-in user's name from the OIDC profile (empty if anonymous).
+ * Optional-OIDC: used to auto-fill the name and skip the staging screen.
+ * @returns {Promise<string>}
+ */
+async function getOidcName() {
+    try {
+        const { data: profile } = await axios.get('/profile', { timeout: 5000 });
+        if (profile && profile.name) {
+            window.localStorage.peer_name = profile.name;
+            return filterXSS(profile.name);
+        }
+    } catch (error) {
+        console.warn('OIDC profile fetch failed', error.message || error);
+    }
+    return '';
+}
+
+/**
  * set your name for the conference
  */
 async function whoAreYou() {
     console.log('11. Who are you?');
 
     document.body.style.background = 'var(--body-bg)';
+
+    // Optional-OIDC: if the user is signed in (auth.cooey.club / Discord),
+    // auto-fill their name and skip the staging screen — straight into the room.
+    if (!myPeerName) {
+        const oidcName = await getOidcName();
+        if (oidcName) myPeerName = oidcName;
+    }
 
     if (myPeerName) {
         elemDisplay(loadingDiv, false);
@@ -13455,17 +13480,20 @@ function handleRoomAction(config, emit = false) {
                     allowOutsideClick: false,
                     allowEscapeKey: false,
                     showDenyButton: true,
+                    showCancelButton: true,
                     background: swBg,
                     imageUrl: images.locked,
-                    title: 'Lock the room?',
-                    text: 'New guests will have to knock and be admitted by you.',
-                    confirmButtonText: `Lock`,
-                    denyButtonText: `Cancel`,
+                    title: 'Room access',
+                    html: 'New guests will knock and be admitted by you.<br/><br/>Show this room in the public room list?',
+                    confirmButtonText: `Locked · listed`,
+                    denyButtonText: `Private · hidden`,
+                    cancelButtonText: `Cancel`,
                     showClass: { popup: 'animate__animated animate__fadeInDown' },
                     hideClass: { popup: 'animate__animated animate__fadeOutUp' },
                 }).then((result) => {
-                    if (result.isConfirmed) {
+                    if (result.isConfirmed || result.isDenied) {
                         thisConfig.password = ''; // knock-only: guests are admitted by the host, no password
+                        thisConfig.private = result.isDenied === true; // Private = hidden from the room list
                         sendToServer('roomAction', thisConfig);
                         handleRoomStatus(thisConfig);
                     }
@@ -13494,7 +13522,11 @@ function handleRoomStatus(config) {
     switch (action) {
         case 'lock':
             playSound('locked');
-            userLog('toast', `${icons.user} ${peer_name} \n has 🔒 LOCKED the room — new guests must knock`, 'top-end');
+            userLog(
+                'toast',
+                `${icons.user} ${peer_name} \n has ${config.private ? '🕶️ made the room PRIVATE (hidden from the list)' : '🔒 LOCKED the room (listed)'} — new guests must knock`,
+                'top-end'
+            );
             elemDisplay(lockRoomBtn, false);
             elemDisplay(unlockRoomBtn, true);
             isRoomLocked = true;

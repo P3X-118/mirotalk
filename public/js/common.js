@@ -216,6 +216,84 @@ function adultContent() {
 }
 
 // #########################################################
+// OPTIONAL-OIDC SIGN-IN STATUS (landing header)
+// #########################################################
+
+// Populate #authStatus from /profile: signed-in users see their name + a
+// sign-out link (and get auto-joined into rooms by their name); anonymous
+// users see a sign-in link only when OIDC is enabled on this instance.
+(function renderAuthStatus() {
+    const el = document.getElementById('authStatus');
+    if (!el) return;
+    fetch('/profile', { headers: { Accept: 'application/json' } })
+        .then((r) => r.json())
+        .then((profile) => {
+            if (profile && profile.name) {
+                const name = filterXSS(profile.name);
+                el.innerHTML =
+                    '<span class="auth-user" title="Signed in — rooms open with this name">&#9673; ' +
+                    name +
+                    '</span> <a class="auth-link" href="/logout">sign out</a>';
+            } else if (profile && profile.oidcEnabled) {
+                el.innerHTML = '<a class="auth-link" href="/auth/login">[ sign in ]</a>';
+            }
+        })
+        .catch((err) => console.warn('auth status unavailable', err.message));
+})();
+
+// #########################################################
+// LIVE ROOM LIST (landing) — open + locked(knock) rooms; private are hidden
+// #########################################################
+
+(function renderRoomList() {
+    const section = document.getElementById('roomsSection');
+    const list = document.getElementById('roomList');
+    if (!section || !list) return;
+
+    function render(rooms) {
+        if (!rooms.length) {
+            list.innerHTML = '<div class="room-list-empty">No open rooms right now — start one above.</div>';
+            return;
+        }
+        list.innerHTML = '';
+        rooms.forEach((room) => {
+            const id = filterXSS(String(room.id));
+            const row = document.createElement('a');
+            row.className = 'room-row' + (room.locked ? ' room-row-locked' : '');
+            row.href = '/join/' + encodeURIComponent(id);
+            const state = room.locked
+                ? '<span class="room-state room-state-locked">&#128274; KNOCK</span>'
+                : '<span class="room-state room-state-open">&#9673; OPEN</span>';
+            row.innerHTML =
+                '<span class="room-name">' +
+                id +
+                '</span>' +
+                '<span class="room-meta">&#128100; ' +
+                room.peers +
+                ' ' +
+                state +
+                '</span>';
+            list.appendChild(row);
+        });
+    }
+
+    function poll() {
+        fetch('/roomList', { headers: { Accept: 'application/json' } })
+            .then((r) => r.json())
+            .then((data) => {
+                if (!data.enabled) {
+                    section.style.display = 'none';
+                    return;
+                }
+                render(data.rooms || []);
+            })
+            .catch((err) => console.warn('room list unavailable', err.message));
+    }
+    poll();
+    setInterval(poll, 5000);
+})();
+
+// #########################################################
 // PERMISSIONS
 // #########################################################
 
