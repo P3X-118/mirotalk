@@ -2103,7 +2103,8 @@ async function whoAreYou() {
     };
     initMicrophoneSelect.onchange = async () => {
         detectBluetoothHeadset(true);
-        await changeLocalMicrophone(initMicrophoneSelect.value);
+        // Staging screen (pre-join): don't force the mute state onto the preview.
+        await changeLocalMicrophone(initMicrophoneSelect.value, false);
         audioInputSelect.selectedIndex = initMicrophoneSelect.selectedIndex;
         refreshLsDevices();
     };
@@ -2468,7 +2469,7 @@ async function changeLocalCamera(deviceId) {
  * Change local microphone by device id
  * @param {string} deviceId
  */
-async function changeLocalMicrophone(deviceId) {
+async function changeLocalMicrophone(deviceId, preserveMuteState = true) {
     // If noise suppression is active, localAudioMediaStream may be the processed stream.
     // Stop the RNNoise pipeline first and stop the *original* microphone tracks.
     const oldMicStream = noiseProcessor?.originalStream || noiseProcessor?.mediaStream || localAudioMediaStream;
@@ -2498,6 +2499,16 @@ async function changeLocalMicrophone(deviceId) {
                 }
             } else {
                 await refreshMyStreamToPeers(micStream, true);
+            }
+
+            // Preserve the user's mute state across the swap: a freshly
+            // acquired getUserMedia track is enabled by default, which would
+            // otherwise silently un-mute a muted user (the mic keeps
+            // transmitting while the toolbar still shows muted). Skipped on
+            // the pre-join staging screen, where there are no peers yet.
+            if (preserveMuteState) {
+                const activeMicTrack = getAudioTrack(localAudioMediaStream);
+                if (activeMicTrack) activeMicTrack.enabled = myAudioStatus;
             }
         })
         .catch((err) => {
@@ -8891,9 +8902,11 @@ async function stopScreenSharing(init) {
             }
         } else {
             if (micTrack) {
-                micTrack.enabled = true;
+                // Respect the user's mute state — don't force the mic back on
+                // when they were muted before/through the screen share.
+                micTrack.enabled = myAudioStatus;
                 await refreshMyStreamToPeers(localAudioMediaStream, true);
-                console.log('[ScreenShare] Refreshing mic audio after screen share stop');
+                console.log('[ScreenShare] Refreshing mic audio after screen share stop (mute preserved)');
             }
         }
         screenReaderAccessibility.announceMessage('Screen sharing stopped');
