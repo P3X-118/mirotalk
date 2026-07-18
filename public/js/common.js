@@ -40,14 +40,42 @@ function getRandomNumber(length) {
     return result;
 }
 
+let activeRoomNames = new Set(); // lowercased ids of live rooms, to avoid name collisions
+
 /**
- * Compose a random room-name suggestion from the active dictionary
- * @returns {string} e.g. 12345AncientAbydos
+ * Refresh the set of currently-live room names (from /roomList) so a suggestion
+ * won't collide with a room that already exists.
+ * @returns {Promise<void>}
+ */
+function refreshActiveRoomNames() {
+    return fetch('/roomList', { headers: { Accept: 'application/json' } })
+        .then((r) => r.json())
+        .then((data) => {
+            activeRoomNames = new Set((data.rooms || []).map((x) => String(x.id).toLowerCase()));
+        })
+        .catch(() => {});
+}
+
+/**
+ * Compose a room-name suggestion from the flavor dictionaries: Adjective+Noun,
+ * with NO number while a flavor combo that isn't already a live room remains.
+ * Only once every combo is taken ("we run out of flavors") do we number one.
+ * @returns {string} e.g. MangoColada
  */
 function generateRoomSuggestion() {
-    const pick = (list) => list[Math.floor(Math.random() * list.length)];
     const capitalize = (word) => word.charAt(0).toUpperCase() + word.substring(1);
-    return getRandomNumber(5) + capitalize(pick(roomNameDict.adjectives)) + capitalize(pick(roomNameDict.nouns));
+    const { adjectives, nouns } = roomNameDict;
+    const available = [];
+    for (const a of adjectives) {
+        for (const n of nouns) {
+            const name = capitalize(a) + capitalize(n);
+            if (!activeRoomNames.has(name.toLowerCase())) available.push(name);
+        }
+    }
+    if (available.length) return available[Math.floor(Math.random() * available.length)];
+    // Every flavor combo is a live room — start numbering a random one.
+    const pick = (list) => list[Math.floor(Math.random() * list.length)];
+    return capitalize(pick(adjectives)) + capitalize(pick(nouns)) + getRandomNumber(3);
 }
 
 /**
@@ -119,6 +147,15 @@ if (roomName) {
             joinRoom();
         }
     };
+
+    // Once we know which rooms are live, refresh the suggestion so the first
+    // name shown also avoids an existing room (unless the user has typed one).
+    refreshActiveRoomNames().then(() => {
+        if (!roomNameUserEdited) {
+            txt = generateRoomSuggestion();
+            shuffleText(roomName, txt);
+        }
+    });
 }
 
 // ####################################################################
@@ -171,7 +208,8 @@ if (adultCnt) {
 
 function genRoom() {
     const input = document.getElementById('roomName');
-    shuffleText(input, getUUID4());
+    shuffleText(input, generateRoomSuggestion());
+    refreshActiveRoomNames(); // keep the live-room set fresh for the next spin
 }
 
 function getUUID4() {

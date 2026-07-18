@@ -49,6 +49,7 @@ const port = process.env.PORT || 3000;
 // BRAND_PRESET selects which baked-in UI brand this instance serves:
 //   sgc    - SGC Meet (meet.sgc.ai): gold/navy palette, Stargate room names (default)
 //   smooje - Libations (libations.cooey.club): cooey purple palette, beverage room names
+//   ccisd  - CCISD Meet (meet.ccisd.me): Clear Creek ISD blue/gold palette, district/space room names
 // Each preset carries the app/og/site/about text blocks plus:
 //   theme     - palette key; injected as html[data-brand] and themed in public/css/brand.css
 //   roomNames - adjective/noun dictionaries for the client room-name generator,
@@ -57,6 +58,7 @@ const port = process.env.PORT || 3000;
 const brandPresets = {
     sgc: {
         theme: 'sgc',
+        roomThemes: {}, // in-call room keeps MiroTalk's default themes
         roomNames: {
             adjectives: (
                 'ancient ascended lost forbidden hidden sacred frozen buried crystal naquadah subspace ' +
@@ -137,6 +139,28 @@ const brandPresets = {
     },
     smooje: {
         theme: 'smooje',
+        // Cooey Terminal in-call room theme — overrides the default `dark`
+        // theme (index 0) so libations rooms are red-on-black by default.
+        roomThemes: {
+            dark: {
+                '--body-bg': 'radial-gradient(#1a0406, #0e1013)',
+                '--msger-bg': 'radial-gradient(#12080a, #0b0b0e)',
+                '--msger-private-bg': 'radial-gradient(#1a0406, #0b0b0e)',
+                '--wb-bg': 'radial-gradient(#12080a, #0b0b0e)',
+                '--elem-border-color': '1px solid rgba(255, 33, 41, 0.22)',
+                '--navbar-bg': 'rgba(5, 5, 7, 0.9)',
+                '--select-bg': '#15080a',
+                '--tab-btn-active': '#3a0d10',
+                '--box-shadow': '0px 4px 14px 0px rgba(0, 0, 0, 0.6)',
+                '--left-msg-bg': '#1a1013',
+                '--right-msg-bg': '#3a0d10',
+                '--private-msg-bg': '#2a0a0d',
+                '--btn-bar-bg-color': '#ff2129',
+                '--btn-bar-color': '#0e1013',
+                '--btns-bg-color': 'rgba(5, 5, 7, 0.8)',
+                '--dd-color': '#ff4650',
+            },
+        },
         // Room names are Smooj-flavor themed: a fruit/descriptor + a smoothie
         // form, e.g. MangoColada, SpikedPinacolada, CoconutBlast. Smooj's real
         // flavors (Piña Colada, Strawberry Banana) and their fruits lead the
@@ -211,6 +235,87 @@ const brandPresets = {
                 <br /><br />
                 <hr />
                 <span>&copy; 2026 cooey.club, all rights reserved</span>
+                <hr />
+            `,
+        },
+    },
+    ccisd: {
+        theme: 'ccisd',
+        // Room names are Clear Creek ISD flavored: district campuses/mascots
+        // plus the Clear Lake / Johnson Space Center heritage the district
+        // serves, e.g. FalconLaunch, StellarClassroom, ClearCreekOrbit.
+        // Tokens stay lowercase alphanumeric so generated names are URL-safe.
+        roomNames: {
+            adjectives: (
+                'clear creek falcon wildcat cougar charger mustang stellar lunar solar orbital cosmic astro ' +
+                'gemini apollo mercury artemis coastal bayside lakeside gulf golden navy bright soaring rising ' +
+                'varsity scholar honor learning junior senior league webster seabrook kemah friendswood'
+            ).split(' '),
+            nouns: (
+                'launch orbit mission rocket capsule module station shuttle splashdown countdown liftoff crew ' +
+                'classroom campus library lab studio commons hall academy huddle assembly seminar cohort ' +
+                'creek bay harbor marina regatta gateway summit horizon'
+            ).split(' '),
+        },
+        app: {
+            language: 'en',
+            name: 'CCISD Meet',
+            title: '<h1>CCISD Meet</h1>Video meetings for Clear Creek ISD.',
+            description: 'Pick a room name and start a secure video meeting. No download or login required.',
+            joinDescription: 'Pick a room name.',
+            joinButtonLabel: 'JOIN ROOM',
+            customizeRoomButtonLabel: 'CUSTOMIZE ROOM',
+            joinLastLabel: 'Your recent room:',
+        },
+        og: {
+            type: 'app-webrtc',
+            siteName: 'CCISD Meet',
+            title: 'Click the link to join the meeting.',
+            description: 'CCISD Meet — secure browser-based video meetings for Clear Creek ISD.',
+            image: 'https://meet.ccisd.me/images/ccisd-logo.svg',
+            url: 'https://meet.ccisd.me',
+        },
+        site: {
+            brandLogo: '../images/ccisd-logo.svg',
+            shortcutIcon: '../images/ccisd-logo.svg',
+            appleTouchIcon: '../images/ccisd-logo.svg',
+            landingTitle: 'CCISD Meet — Video meetings for Clear Creek ISD.',
+            newCallTitle: 'CCISD Meet — Video meetings for Clear Creek ISD.',
+            newCallRoomTitle: 'Pick name. <br />Share URL. <br />Start meeting.',
+            newCallRoomDescription:
+                "Each room has its own disposable URL. Just pick a room name and share your custom URL. It's that easy.",
+            loginTitle: 'CCISD Meet - Host Protected login required.',
+            loginHeading: 'Welcome back',
+            loginDescription: 'Enter your credentials to continue.',
+            loginButtonLabel: 'Login',
+            joinRoomTitle: 'Pick name.<br />Share URL.<br />Start meeting.',
+            joinRoomButtonLabel: 'JOIN ROOM',
+            clientTitle: 'CCISD Meet — WebRTC Video Meeting, Chat & Screen Sharing.',
+            privacyPolicyTitle: 'CCISD Meet - privacy and policy.',
+            stunTurnTitle: 'Test Stun/Turn Servers.',
+            notFoundTitle: 'CCISD Meet - 404 Page not found.',
+            waitingRoomTitle: 'CCISD Meet - Waiting for host to start the meeting',
+            waitingRoomHeading: 'Waiting for host...',
+            waitingRoomDescription:
+                "The meeting hasn't started yet.<br />You'll join automatically when the host opens the room.",
+            waitingRoomStatus: 'Checking room status...',
+            waitingRoomReady: 'Room is ready! Joining...',
+            waitingRoomWaiting: 'Waiting for host to start the meeting...',
+            waitingRoomHostLink: 'Are you the host?',
+            waitingRoomLoginLink: 'Login here',
+            waitingRoomElapsedJust: 'Just started waiting',
+            waitingRoomElapsedMinutes: 'Waiting for {minutes}',
+            waitingRoomSongUrl: '../sounds/waiting-music.mp3',
+        },
+        about: {
+            imageUrl: '../images/ccisd-logo.svg',
+            title: `CCISD Meet v${packageJson.version}`,
+            html: `
+                <br />
+                <span>Video meetings for Clear Creek ISD.</span>
+                <br /><br />
+                <hr />
+                <span>&copy; 2026 Clear Creek ISD — A World-Class Education from Pre-K to Career</span>
                 <hr />
             `,
         },
@@ -503,34 +608,12 @@ module.exports = {
      * The client merges these with built-in defaults, so you
      * only need to specify the properties you want to change.
      */
-    themes: {
-        /* Example: override dark theme background
-        dark: {
-            '--body-bg': 'radial-gradient(#1a1a2e, #0a0a14)',
-            '--msger-bg': 'radial-gradient(#1a1a2e, #0a0a14)',
-        },
-        */
-        /* Example: add a custom theme
-        ocean: {
-            '--body-bg': 'radial-gradient(#0d2137, #061220)',
-            '--msger-bg': 'radial-gradient(#0d2137, #061220)',
-            '--msger-private-bg': 'radial-gradient(#0d2137, #061220)',
-            '--wb-bg': 'radial-gradient(#0d2137, #061220)',
-            '--elem-border-color': '1px solid rgba(56, 189, 248, 0.15)',
-            '--navbar-bg': 'rgba(6, 18, 32, 0.88)',
-            '--select-bg': '#0f2a45',
-            '--tab-btn-active': '#163d5e',
-            '--box-shadow': '0px 4px 12px 0px rgba(0, 0, 0, 0.5)',
-            '--left-msg-bg': '#112d4a',
-            '--right-msg-bg': '#0a1f35',
-            '--private-msg-bg': '#0e2540',
-            '--btn-bar-bg-color': '#E0F2FE',
-            '--btn-bar-color': '#061220',
-            '--btns-bg-color': 'rgba(6, 18, 32, 0.75)',
-            '--dd-color': '#38BDF8',
-        },
-        */
-    },
+    // In-call room themes, merged into the client's themeMap via GET /themes.
+    // Driven by the active brand preset (brandPreset.roomThemes) so a brand can
+    // recolor the room UI: smooje overrides the default `dark` theme with the
+    // Cooey Terminal red-on-black palette, making libations rooms terminal by
+    // default (index 0 = dark). sgc leaves it empty (normal dark).
+    themes: brandPreset.roomThemes || {},
     /**
      * Configuration for controlling the visibility of buttons in the MiroTalk P2P client.
      * Set properties to true to show the corresponding buttons, or false to hide them.

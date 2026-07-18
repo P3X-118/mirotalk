@@ -1,5 +1,6 @@
-/* Local terminal font (self-contained; no external CDN). @import must lead. */
+/* Local brand fonts (self-contained; no external CDN). @import must lead. */
 @import url('../vendor/fonts/jetbrains-mono.css');
+@import url('../vendor/fonts/montserrat.css');
 
 /* Brand palettes, keyed off html[data-brand] (injected server-side via the
    {{BRAND_THEME}} placeholder and re-asserted by brand.js from /brand data).
@@ -65,6 +66,52 @@ html[data-brand='smooje'] {
     --text: #e6e7ea;
     --text-muted: #9a9da3;
     --border: #7a0e12;
+}
+
+/* CCISD Meet (meet.ccisd.me — Clear Creek ISD) — clean institutional look:
+   Montserrat on dark-neutral surfaces derived from the district blue
+   #002395, gold #fcc742 as the action/highlight accent and secondary blue
+   #556cb8 for borders/muted accents. Deliberately NONE of the smooje
+   CRT/scanline/phosphor effects. */
+html[data-brand='ccisd'] {
+    --brand-accent: #fcc742;
+    --brand-accent-bright: #ffd76e;
+    --brand-accent-dim: #556cb8;
+    --brand-bg: #0a1128;
+    --brand-bg-elev: #101a3c;
+    --brand-surface: #16214a;
+    --brand-border: #2a3766;
+    --brand-text: #f2f5fc;
+    --brand-text-muted: #93a0c4;
+    --brand-bg-glow: #0e1d55;
+    --brand-logo-glow: rgba(252, 199, 66, 0.35);
+    --brand-btn-text: #0a1128;
+    --brand-font-mono: 'Montserrat', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --brand-radius: 10px;
+
+    /* Per-page var overrides so pages with their own palettes adopt the
+       CCISD colors: customizeRoom.css (--cr-*) and activeRooms.css. */
+    --cr-bg-color: #0a1128;
+    --cr-card-bg: rgba(85, 108, 184, 0.08);
+    --cr-card-border: #2a3766;
+    --cr-card-border-strong: #fcc742;
+    --cr-text: #f2f5fc;
+    --cr-text-muted: #93a0c4;
+    --cr-input-bg: #16214a;
+    --cr-input-border: #2a3766;
+    --cr-input-border-focus: #fcc742;
+    --cr-accent-green: #fcc742;
+    --cr-accent-green-2: #556cb8;
+    --primary-bg: #0a1128;
+    --container-bg: #101a3c;
+    --card-bg: #16214a;
+    --card-bg-hover: #1b2a5e;
+    --accent: #fcc742;
+    --accent-hover: #ffd76e;
+    --accent-glow: rgba(252, 199, 66, 0.18);
+    --text: #f2f5fc;
+    --text-muted: #93a0c4;
+    --border: #2a3766;
 }
 
 html,
@@ -348,18 +395,28 @@ html[data-brand='smooje'] .brand-logo {
         inset 0 0 12px rgba(255, 33, 41, 0.15);
 }
 
-/* The room name reads like a terminal prompt: a blinking red `>` before it. */
+/* The room name reads like a terminal prompt: a blinking red `>` before it.
+   Absolute-positioned so it sits inside the field, vertically centred and in
+   line with the room-name text; the input is padded to make room for it. */
 html[data-brand='smooje'] .room-input-wrap {
     position: relative;
     box-shadow: inset 0 0 12px rgba(255, 33, 41, 0.08);
 }
 html[data-brand='smooje'] .room-input-wrap::before {
     content: '>';
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
     color: var(--brand-accent);
     font-weight: 700;
-    padding: 0 4px 0 12px;
-    align-self: center;
+    line-height: 1;
+    pointer-events: none;
+    z-index: 2;
     animation: term-blink 1.1s steps(1) infinite;
+}
+html[data-brand='smooje'] .room-input-wrap .form-input {
+    padding-left: 32px;
 }
 html[data-brand='smooje'] .form-input {
     caret-color: var(--brand-accent);
@@ -416,4 +473,63 @@ html[data-brand='smooje'] .cta-inner::after {
     right: -1px;
     border-left: none;
     border-top: none;
+}
+
+/* ===================================================================== */
+/* CCISD — clean institutional styling (ccisd brand only). Montserrat,    */
+/* district blue + gold; explicitly NO scanlines/CRT/glow flourishes.     */
+/* ===================================================================== */
+
+html[data-brand='ccisd'],
+html[data-brand='ccisd'] body,
+html[data-brand='ccisd'] .form-input,
+html[data-brand='ccisd'] input,
+html[data-brand='ccisd'] button {
+    font-family: var(--brand-font-mono);
+}
+
+/* Card: soft navy shadow + a gold district ribbon across the top. */
+html[data-brand='ccisd'] .cta-inner,
+html[data-brand='ccisd'] .cta-split {
+    border-top: 4px solid #fcc742;
+    box-shadow: 0 12px 32px rgba(3, 8, 26, 0.5);
+}
+
+/* The district wordmark SVG is #002395-on-transparent; give it a white
+   tile so it reads on the navy page, ringed in soft gold. */
+html[data-brand='ccisd'] .brand-logo {
+    background: #ffffff;
+    border: 1px solid var(--brand-border);
+    border-radius: 12px;
+    box-shadow: 0 0 0 4px rgba(252, 199, 66, 0.3);
+    object-fit: contain;
+    padding: 8px;
+}
+
+/* Headings: clean sentence case (no smooje uppercase/tracking/glow). */
+html[data-brand='ccisd'] .cta-slogan h3,
+html[data-brand='ccisd'] #newCallRoomTitle,
+html[data-brand='ccisd'] #appJoinDescription {
+    color: var(--brand-text);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    text-shadow: none;
+}
+
+html[data-brand='ccisd'] .form-input {
+    caret-color: var(--brand-accent);
+}
+
+/* Buttons: solid gold primary / blue-outlined secondary, no glow. */
+html[data-brand='ccisd'] .button-primary,
+html[data-brand='ccisd'] .button-custom-room {
+    letter-spacing: 0.06em;
+    font-weight: 700 !important;
+    border-radius: var(--brand-radius) !important;
+    box-shadow: none;
+}
+
+/* Replace the shared red-tinted room-row hover glow with a gold one. */
+html[data-brand='ccisd'] .room-row:hover {
+    box-shadow: 0 0 14px rgba(252, 199, 66, 0.25);
 }
